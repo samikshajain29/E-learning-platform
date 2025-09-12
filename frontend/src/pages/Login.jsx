@@ -4,13 +4,42 @@ import google from "../assets/google.jpg";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEye } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { serverUrl } from "../App";
+import { toast } from "react-toastify";
+import { ClipLoader } from "react-spinners";
 
 function Login() {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      const result = await axios.post(
+        serverUrl + "/api/auth/login",
+        { email, password },
+        { withCredentials: true }
+      );
+      console.log(result.data);
+      setLoading(false);
+      navigate("/");
+      toast.success("Login Successfully");
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      toast.error(error.response.data.message);
+    }
+  };
   return (
     <div className="bg-[#dddbdb] w-[100vw] h-[100vh] flex items-center justify-center">
-      <form className="w-[90%] md:w-[800px] h-[600px] bg-[white] shadow-xl rounded-2xl flex">
+      <form
+        className="w-[90%] md:w-[800px] h-[600px] bg-[white] shadow-xl rounded-2xl flex"
+        onSubmit={(e) => e.preventDefault()}
+      >
         {/* left div */}
         <div className="md:w-[50%] w-[100%] h-[100%] flex flex-col items-center justify-center gap-3">
           <div>
@@ -29,6 +58,8 @@ function Login() {
               type="email"
               className="border-2 w-[100%] h-[35px] border-[#e7e6e6] text-[15px] px-[20px]"
               placeholder="Your Email"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
             />
           </div>
           <div className="flex flex-col gap-1 w-[80%] items-start justify-center px-3 relative">
@@ -40,6 +71,8 @@ function Login() {
               type={show ? "text" : "password"}
               className="border-2 w-[100%] h-[35px] border-[#e7e6e6] text-[15px] px-[20px]"
               placeholder="Your Password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
             />
             {!show ? (
               <IoEyeOutline
@@ -53,8 +86,12 @@ function Login() {
               />
             )}
           </div>
-          <button className="w-[80%] h-[40px] bg-black text-white cursor-pointer flex items-center justify-center rounded-[5px]">
-            Login
+          <button
+            className="w-[80%] h-[40px] bg-black text-white cursor-pointer flex items-center justify-center rounded-[5px]"
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? <ClipLoader size={30} color="white" /> : "Login"}
           </button>
           <span className="text-[13px] cursor-pointer text-[#585757]">
             Forget your password ?
