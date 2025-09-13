@@ -4,9 +4,11 @@ import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import { ToastContainer, toast } from "react-toastify";
+import getCurrentUser from "./customHooks/getCurrentUser";
 export const serverUrl = "http://localhost:8000";
 
 function App() {
+  getCurrentUser();
   return (
     <>
       <ToastContainer />
