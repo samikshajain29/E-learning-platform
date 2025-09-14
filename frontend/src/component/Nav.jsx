@@ -84,7 +84,10 @@ function Nav() {
           {/* option boxes */}
           {show && (
             <div className="absolute top-[110%] right-[15%] flex items-center flex-col justify-center gap-2 text-[16px] rounded-md bg-[white] px-[15px] py-[10px] border-[2px] border-black hover:border-white hover:text-white cursor-pointer hover:bg-black">
-              <span className="bg-[black] text-white px-[30px] py-[10px] rounded-2xl hover:bg-gray-600">
+              <span
+                className="bg-[black] text-white px-[30px] py-[10px] rounded-2xl hover:bg-gray-600"
+                onClick={() => navigate("/profile")}
+              >
                 My Profile
               </span>
               <span className="bg-[black] text-white px-[30px] py-[10px] rounded-2xl hover:bg-gray-600">
@@ -119,7 +122,10 @@ function Nav() {
               {userData?.name.slice(0, 1).toUpperCase()}
             </div>
           )}
-          <div className="w-[200px] h-[65px] border-2 border-white flex items-center justify-center text-white bg-[black] rounded-[10px] text-[18px] font-light cursor-pointer">
+          <div
+            className="w-[200px] h-[65px] border-2 border-white flex items-center justify-center text-white bg-[black] rounded-[10px] text-[18px] font-light cursor-pointer"
+            onClick={() => navigate("/profile")}
+          >
             My Profile
           </div>
           <div className="w-[200px] h-[65px] border-2 border-white flex items-center justify-center text-white bg-[black] rounded-[10px] text-[18px] font-light cursor-pointer">
