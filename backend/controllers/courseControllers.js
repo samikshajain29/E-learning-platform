@@ -1,5 +1,6 @@
 import { connect } from "mongoose";
 import Course from "../models/courseModel.js";
+import uploadOnCloudinary from "../config/cloudinary.js";
 
 export const createCourse = async (req, res) => {
   try {
