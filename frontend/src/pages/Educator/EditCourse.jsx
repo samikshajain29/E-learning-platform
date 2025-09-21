@@ -7,6 +7,8 @@ import axios from "axios";
 import { serverUrl } from "../../App";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
+import { useDispatch, useSelector } from "react-redux";
+import { setCourseData } from "../../redux/courseSlice";
 
 function EditCourse() {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ function EditCourse() {
   const [backendImage, setBackendImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loading1, setLoading1] = useState(false);
+  const dispatch = useDispatch();
+  const { courseData } = useSelector((state) => state.course);
 
   const handleThumbnail = (e) => {
     const file = e.target.files[0];
@@ -77,6 +81,19 @@ function EditCourse() {
         { withCredentials: true }
       );
       console.log(result.data);
+      const updateData = result.data;
+      if (updateData.isPublished) {
+        const updateCourses = courseData.map((c) =>
+          c._id === courseId ? updateData : c
+        );
+        if (!courseData.some((c) => c._id === courseId)) {
+          updateCourses.push(updateData);
+        }
+        dispatch(setCourseData(updateCourses));
+      } else {
+        const filterCourses = courseData.filter((c) => c._id !== courseId);
+        dispatch(setCourseData(filterCourses));
+      }
       setLoading(false);
       navigate("/courses");
       toast.success("Course Updated");
@@ -95,6 +112,8 @@ function EditCourse() {
         { withCredentials: true }
       );
       console.log(result.data);
+      const filterCourses = courseData.filter((c) => c._id !== courseId);
+      dispatch(setCourseData(filterCourses));
       setLoading1(false);
       navigate("/courses");
       toast.success("Course Removed");
@@ -144,7 +163,11 @@ function EditCourse() {
             className="bg-red-600 text-white px-4 py-2 rounded-md"
             onClick={handleRemoveCourse}
           >
-            Remove Course
+            {loading1 ? (
+              <ClipLoader size={30} color="white" />
+            ) : (
+              "Remove Course"
+            )}
           </button>
         </div>
 
