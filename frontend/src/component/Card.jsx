@@ -11,7 +11,7 @@ function Card({ thumbnail, title, category, price, id }) {
           {category}
         </span>
         <div className="flex justify-between text-sm text-gray-600 mt-3 px-[10px]">
-          <span className="font-semibold text-gray-800">{price}</span>
+          <span className="font-semibold text-gray-800">₹ {price}</span>
           <span className="flex items-center gap-1">
             <FaStar className="text-yellow-500" />5
           </span>
