@@ -23,6 +23,7 @@ function EditCourse() {
   const [frontendImage, setFrontendImage] = useState(img);
   const [backendImage, setBackendImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loading1, setLoading1] = useState(false);
 
   const handleThumbnail = (e) => {
     const file = e.target.files[0];
@@ -85,6 +86,24 @@ function EditCourse() {
       toast.error(error.response.data.message);
     }
   };
+
+  const handleRemoveCourse = async () => {
+    setLoading1(true);
+    try {
+      const result = await axios.delete(
+        serverUrl + `/api/course/remove/${courseId}`,
+        { withCredentials: true }
+      );
+      console.log(result.data);
+      setLoading1(false);
+      navigate("/courses");
+      toast.success("Course Removed");
+    } catch (error) {
+      console.log(error);
+      setLoading1(false);
+      toast.error(error.response.data.message);
+    }
+  };
   return (
     <div className="max-w-5xl mx-auto p-6 mt-10 bg-white rounded-lg shadow-md">
       {/* top bar */}
@@ -121,7 +140,10 @@ function EditCourse() {
               Click to UnPublish
             </button>
           )}
-          <button className="bg-red-600 text-white px-4 py-2 rounded-md">
+          <button
+            className="bg-red-600 text-white px-4 py-2 rounded-md"
+            onClick={handleRemoveCourse}
+          >
             Remove Course
           </button>
         </div>
