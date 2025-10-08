@@ -135,7 +135,10 @@ function EditCourse() {
           Add Detail Information regarding the Course
         </h2>
         <div className="space-x-2 space-y-2">
-          <button className="bg-black text-white px-4 py-2 rounded-md">
+          <button
+            className="bg-black text-white px-4 py-2 rounded-md"
+            onClick={() => navigate(`/createlecture/${selectCourse?._id}`)}
+          >
             Go to Lecture page
           </button>
         </div>
