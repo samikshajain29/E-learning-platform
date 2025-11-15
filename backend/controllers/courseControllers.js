@@ -2,6 +2,7 @@ import { connect } from "mongoose";
 import Course from "../models/courseModel.js";
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Lecture from "../models/lectureModel.js";
+import User from "../models/userModel.js";
 
 export const createCourse = async (req, res) => {
   try {
@@ -22,7 +23,9 @@ export const createCourse = async (req, res) => {
 
 export const getPublishedCourses = async (req, res) => {
   try {
-    const courses = await Course.find({ isPublished: true });
+    const courses = await Course.find({ isPublished: true }).populate(
+      "lectures"
+    );
     if (!courses) {
       return res.status(400).json({ message: "Courses are not found" });
     }
@@ -200,5 +203,21 @@ export const removeLecture = async (req, res) => {
     return res
       .status(500)
       .json({ message: `failed to remove Lecture ${error}` });
+  }
+};
+
+//get creator
+
+export const getCreatorById = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User is not found" });
+    }
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: `Failed to get creator ${error}` });
   }
 };
