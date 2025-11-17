@@ -10,11 +10,13 @@ import { serverUrl } from "../App";
 import { useState } from "react";
 import { IoIosPlayCircle } from "react-icons/io";
 import { FaLock } from "react-icons/fa";
+import { toast } from "react-toastify";
 import axios from "axios";
 import Card from "../component/Card";
 function ViewCourse() {
   const navigate = useNavigate();
 
+  const { userData } = useSelector((state) => state.user);
   const { courseId } = useParams();
   const { courseData } = useSelector((state) => state.course); // publish course courseData ki array me h
   const { selectedCourse } = useSelector((state) => state.course);
@@ -22,6 +24,7 @@ function ViewCourse() {
   const [selectedLecture, setSelectedLecture] = useState(null);
   const [creatorData, setCreatorData] = useState(null);
   const [creatorCourses, setCreatorCourses] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   const fetchCourseData = async () => {
     courseData.map((course) => {
@@ -56,6 +59,17 @@ function ViewCourse() {
   }, [selectedCourse]);
 
   useEffect(() => {
+    if (userData && selectedCourse?._id) {
+      const verify = userData.enrolledCourses?.some(
+        (c) =>
+          (typeof c === "string" ? c : c._id).toString() ===
+          selectedCourse._id.toString()
+      );
+      setIsEnrolled(verify);
+    }
+  }, [userData, selectedCourse]);
+
+  useEffect(() => {
     fetchCourseData();
   }, [courseData, courseId]);
 
@@ -68,6 +82,45 @@ function ViewCourse() {
       setCreatorCourses(creatorCourse);
     }
   }, [creatorData, courseData]);
+
+  const handleEnroll = async (userId, courseId) => {
+    try {
+      const orderData = await axios.post(
+        serverUrl + "/api/order/razorpay-order",
+        { userId, courseId },
+        { withCredentials: true }
+      );
+      console.log(orderData);
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.data.amount,
+        currency: "INR",
+        name: "E-LEARNING",
+        description: "COURSE ENROLLMENT PAYMENT",
+        order_id: orderData.data.id,
+        handler: async function (response) {
+          console.log("RazorPay Response", response);
+          try {
+            const verifyPayment = await axios.post(
+              serverUrl + "/api/order/verifypayment",
+              { ...response, courseId, userId },
+              { withCredentials: true }
+            );
+            setIsEnrolled(true);
+            toast.success(verifyPayment.data.message);
+          } catch (error) {
+            toast.error(error.response.data.message);
+          }
+        },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong while enrolling");
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-6 space-y-6 relative">
@@ -120,9 +173,21 @@ function ViewCourse() {
                 <li>✔️ Lifetime access to course materials</li>
               </ul>
 
-              <button className="bg-black text-white px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer">
-                Enroll Now
-              </button>
+              {!isEnrolled ? (
+                <button
+                  className="bg-black text-white px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
+                  onClick={() => handleEnroll(userData._id, courseId)}
+                >
+                  Enroll Now
+                </button>
+              ) : (
+                <button
+                  className="bg-green-100 text-green-500 px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
+                  onClick={() => navigate(`/viewlecture/${courseId}`)}
+                >
+                  Watch Now
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ dotenv.config();
 import cors from "cors";
 import userRouter from "./routes/userRoutes.js";
 import courseRouter from "./routes/courseRoutes.js";
+import paymentRouter from "./routes/paymentRoutes.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -23,6 +24,7 @@ app.use(
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/course", courseRouter);
+app.use("/api/order", paymentRouter);
 
 app.listen(port, () => {
   console.log("server started");
