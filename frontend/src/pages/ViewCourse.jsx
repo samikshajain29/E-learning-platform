@@ -1,5 +1,5 @@
 import React from "react";
-import { FaLongArrowAltLeft } from "react-icons/fa";
+import { FaArrowLeftLong } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { setSelectedCourse } from "../redux/courseSlice";
@@ -130,7 +130,7 @@ function ViewCourse() {
           {/* thumbnail */}
 
           <div className="w-full md:w-1/2">
-            <FaLongArrowAltLeft
+            <FaArrowLeftLong
               className="text-black w-[22px] h-[22px] cursor-pointer"
               onClick={() => navigate("/")}
             />
