@@ -17,7 +17,8 @@ function About() {
             controls
             autoplay
             loop
-          />
+            muted
+          ></video>
         </div>
       </div>
       {/* for about info */}
