@@ -6,6 +6,7 @@ import { IoEye } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { serverUrl } from "../App";
+import { FaArrowLeftLong } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { useDispatch } from "react-redux";
@@ -60,11 +61,15 @@ function Login() {
     }
   };
   return (
-    <div className="bg-[#dddbdb] w-[100vw] h-[100vh] flex items-center justify-center">
+    <div className="bg-[#dddbdb] w-[100vw] h-[100vh] flex items-center justify-center ">
       <form
-        className="w-[90%] md:w-[800px] h-[600px] bg-[white] shadow-xl rounded-2xl flex"
+        className="w-[90%] md:w-[800px] h-[600px] bg-[white] shadow-xl rounded-2xl flex relative"
         onSubmit={(e) => e.preventDefault()}
       >
+        <FaArrowLeftLong
+          className="absolute top-[16%] left-[5%] w-[22px] h-[22px] cursor-pointer"
+          onClick={() => navigate("/")}
+        />
         {/* left div */}
         <div className="md:w-[50%] w-[100%] h-[100%] flex flex-col items-center justify-center gap-3">
           <div>
