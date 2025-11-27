@@ -39,12 +39,6 @@ function Profile() {
             <span className="font-semibold text-gray-700">Bio:</span>
             <span>{userData.description}</span>
           </div>
-          <div className="text-sm flex items-center justify-start gap-1">
-            <span className="font-semibold text-gray-700">
-              Enrolled Courses:
-            </span>
-            <span>{userData.enrolledCourses.length}</span>
-          </div>
         </div>
         <div className="mt-6 flex justify-center gap-4">
           <button

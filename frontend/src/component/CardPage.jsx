@@ -14,7 +14,7 @@ function CardPage() {
       <h1 className="md:text-[45px] text-[30px] font-semibold text-center mt-[30px] px-[20px]">
         Our Popular Courses
       </h1>
-      <span className="lg:w-[50%] md:w-[80%] text-[15px] text-center mt-[30px] mb-[30px] px-[20px]">
+      <span className="lg:w-[50%] md:w-[80%] text-[18px] text-center mt-[30px] mb-[30px] px-[20px]">
         Explore top-rated courses designed to boost your skills, enhance
         careers, and unlock opportunities in tech, AI, business, and beyond.
       </span>
