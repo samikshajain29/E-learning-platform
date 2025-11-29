@@ -15,7 +15,7 @@ function About() {
             src={video}
             className="w-full rounded-xl shadow-lg border-2 border-white"
             controls
-            autoplay
+            autoPlay
             loop
             muted
           ></video>

@@ -22,12 +22,14 @@ import ViewCourse from "./pages/ViewCourse";
 import ScrollToTop from "./component/ScrollToTop";
 import ViewLectures from "./pages/ViewLectures";
 import MyEnrolledCourses from "./pages/MyEnrolledCourses";
+import getAllReviews from "./customHooks/getAllReviews";
 export const serverUrl = "http://localhost:8000";
 
 function App() {
   getCurrentUser();
   getCreatorCourse();
   getPublishedCourse();
+  getAllReviews();
 
   const { userData } = useSelector((state) => state.user);
   return (
