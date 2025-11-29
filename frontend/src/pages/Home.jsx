@@ -37,7 +37,10 @@ function Home() {
             View All Courses{" "}
             <SiViaplay className="w-[30px] h-[30px] lg:fill-white fill-black" />
           </button>
-          <button className="px-[20px] py-[10px] lg:bg-white bg-black lg:text-black text-white rounded-[10px] text-[18px] font-light flex gap-2 cursor-pointer items-center justify-center">
+          <button
+            className="px-[20px] py-[10px] lg:bg-white bg-black lg:text-black text-white rounded-[10px] text-[18px] font-light flex gap-2 cursor-pointer items-center justify-center"
+            onClick={() => navigate("/search")}
+          >
             Search With Ai{" "}
             <img
               src={ai}
