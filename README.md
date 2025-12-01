@@ -48,3 +48,11 @@ E-learning-platform/
 │── backend/         # Express server & APIs
 │── package.json     
 │── README.md
+
+---
+## ⚙️ Installation
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/samikshajain29/E-learning-platform.git
+
