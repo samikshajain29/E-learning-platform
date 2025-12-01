@@ -198,7 +198,9 @@ function ViewCourse() {
                   <FaStar />
                   {avgRating}
                 </span>
-                <span className="text-gray-400">(1,200 Reviews)</span>
+                <span className="text-gray-400">
+                  ({selectedCourse?.reviews.length} reviews)
+                </span>
               </div>
               {/* //price */}
               <div>

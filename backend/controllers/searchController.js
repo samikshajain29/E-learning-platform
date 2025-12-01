@@ -6,14 +6,14 @@ export const searchWithAi = async (req, res) => {
     if (!input) {
       return res.status(400).json({ message: "Search query is required" });
     }
-    const courses = await Course.findby({
+    const courses = await Course.find({
       isPublished: true,
       $or: [
-        { title: { $regex: input, options: "i" } },
-        { subTitle: { $regex: input, options: "i" } },
-        { description: { $regex: input, options: "i" } },
-        { category: { $regex: input, options: "i" } },
-        { level: { $regex: input, options: "i" } },
+        { title: { $regex: input, $options: "i" } },
+        { subTitle: { $regex: input, $options: "i" } },
+        { description: { $regex: input, $options: "i" } },
+        { category: { $regex: input, $options: "i" } },
+        { level: { $regex: input, $options: "i" } },
       ],
     });
     return res.status(200).json(courses);
