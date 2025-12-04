@@ -25,7 +25,11 @@ function Dashboard() {
 
   const EnrollData =
     creatorCourseData?.map((course) => ({
-      name: course.title?.slice(0, 10) + "...",
+      name:
+        course.title.length > 12
+          ? course.title.slice(0, 12) + "…"
+          : course.title,
+
       enrolled: course.enrolledStudents?.length || 0,
     })) || [];
 
@@ -77,9 +81,20 @@ function Dashboard() {
               Course Progress (Lectures)
             </h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={courseProgressData}>
+              <BarChart
+                data={courseProgressData}
+                key={courseProgressData.length}
+                barCategoryGap="25%"
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                  tick={{ fontSize: 12 }}
+                />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="lectures" fill="black" radius={[5, 5, 0, 0]} />
@@ -90,9 +105,20 @@ function Dashboard() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-lg font-semibold mb-4">Students Enrollment</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={EnrollData}>
+              <BarChart
+                data={EnrollData}
+                key={EnrollData.length}
+                barCategoryGap="25%"
+              >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis
+                  dataKey="name"
+                  interval={0}
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                  tick={{ fontSize: 12 }}
+                />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="enrolled" fill="black" radius={[5, 5, 0, 0]} />

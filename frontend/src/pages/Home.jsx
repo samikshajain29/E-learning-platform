@@ -61,6 +61,7 @@ function Home() {
       <About />
       <ReviewPage />
       <Footer />
+      {/* <div className="w-[80px] h-[80px] bg-white absolute top-150 rounded-full "></div> */}
     </div>
   );
 }
