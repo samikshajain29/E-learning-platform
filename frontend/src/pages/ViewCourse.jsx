@@ -386,6 +386,7 @@ function ViewCourse() {
               price={course.price}
               title={course.title}
               category={course.category}
+              reviews={course.reviews}
             />
           ))}
         </div>
