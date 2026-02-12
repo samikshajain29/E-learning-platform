@@ -9,6 +9,8 @@ import userRouter from "./routes/userRoutes.js";
 import courseRouter from "./routes/courseRoutes.js";
 import paymentRouter from "./routes/paymentRoutes.js";
 import reviewRouter from "./routes/reviewRoute.js";
+import wishlistRouter from "./routes/wishlistRoutes.js";
+import progressRouter from "./routes/progressRoutes.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -27,6 +29,8 @@ app.use("/api/user", userRouter);
 app.use("/api/course", courseRouter);
 app.use("/api/order", paymentRouter);
 app.use("/api/review", reviewRouter);
+app.use("/api/wishlist", wishlistRouter);
+app.use("/api/progress", progressRouter);
 
 app.listen(port, () => {
   console.log("server started");

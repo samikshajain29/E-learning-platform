@@ -107,6 +107,12 @@ function Nav() {
               >
                 My Courses
               </span>
+              <span
+                className="bg-[black] text-white px-[30px] py-[10px] rounded-2xl hover:bg-gray-600"
+                onClick={() => navigate("/wishlist")}
+              >
+                My Wishlist
+              </span>
             </div>
           )}
         </div>
@@ -118,11 +124,10 @@ function Nav() {
 
         {/* for small devices */}
         <div
-          className={`fixed top-0 left-0 w-[100vw] h-[100vh] bg-[#000000d6] flex items-center justify-center flex-col gap-5 z-10 lg:hidden ${
-            showHam
+          className={`fixed top-0 left-0 w-[100vw] h-[100vh] bg-[#000000d6] flex items-center justify-center flex-col gap-5 z-10 lg:hidden ${showHam
               ? "translate-x-[0] transition duration-600"
               : "translate-x-[-100%] transition duration-600"
-          }`}
+            }`}
         >
           <GiSplitCross
             className="w-[35px] h-[35px] fill-white absolute top-5 right-[4%]"
@@ -152,6 +157,12 @@ function Nav() {
             onClick={() => navigate("/mycourses")}
           >
             My Courses
+          </div>
+          <div
+            className="w-[200px] h-[65px] border-2 border-white flex items-center justify-center text-white bg-[black] rounded-[10px] text-[18px] font-light cursor-pointer"
+            onClick={() => navigate("/wishlist")}
+          >
+            My Wishlist
           </div>
           {userData?.role === "educator" && (
             <div

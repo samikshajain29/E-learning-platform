@@ -5,6 +5,7 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate, useParams } from "react-router-dom";
 import { IoIosPlayCircle } from "react-icons/io";
 import { serverUrl } from "../App";
+import VideoPlayer from "../component/VideoPlayer";
 
 function ViewLectures() {
   const { courseId } = useParams();
@@ -13,9 +14,14 @@ function ViewLectures() {
   const selectedCourse = courseData?.find((course) => course._id === courseId);
   const [creatorData, setCreatorData] = useState(null);
   const [selectedLecture, setSelectedLecture] = useState(
-    selectedCourse?.lectures?.[0] || null
+    selectedCourse?.lectures?.[0] || null,
   );
   const navigate = useNavigate();
+
+  // Check if user is enrolled in this course
+  const isEnrolled = userData?.enrolledCourses?.some(
+    (c) => (typeof c === "string" ? c : c._id).toString() === courseId,
+  );
 
   useEffect(() => {
     const handleCreator = async () => {
@@ -26,7 +32,7 @@ function ViewLectures() {
             {
               userId: selectedCourse?.creator,
             },
-            { withCredentials: true }
+            { withCredentials: true },
           );
           console.log(result.data);
           setCreatorData(result.data);
@@ -38,18 +44,50 @@ function ViewLectures() {
     handleCreator();
   }, [selectedCourse]);
 
+  // Check if user has access to lectures
+  // Educator or creator: Always has access
+  // Student: Only if enrolled
+  const hasAccess =
+    userData?.role === "educator" ||
+    selectedCourse?.creator === userData?._id ||
+    isEnrolled;
+
+  // Redirect if no access
+  useEffect(() => {
+    if (userData && selectedCourse && !hasAccess) {
+      navigate(`/viewcourse/${courseId}`);
+    }
+  }, [userData, selectedCourse, hasAccess, navigate, courseId]);
+
+  // Handle progress update from VideoPlayer
+  const handleProgressUpdate = (progressData) => {
+    console.log("Progress updated:", progressData);
+    // Can be used to update UI in real-time if needed
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col md:flex-row gap-6">
       {/* left or top */}
       <div className="w-full md:w-2/3 bg-white rounded-2xl shadow-md p-6 border border-gray-200">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold flex items-center justify-start gap-[20px] text-gray-800">
-            <FaArrowLeftLong
-              className="text-black w-[22px] h-[22px] cursor-pointer"
-              onClick={() => navigate("/")}
-            />
-            {selectedCourse?.title}
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold flex items-center justify-start gap-[20px] text-gray-800">
+              <FaArrowLeftLong
+                className="text-black w-[22px] h-[22px] cursor-pointer"
+                onClick={() => navigate("/")}
+              />
+              {selectedCourse?.title}
+            </h2>
+            {/* Ask Doubt Button - Top Right */}
+            <button
+              onClick={() =>
+                window.open("https://sjaii.netlify.app/", "_blank")
+              }
+              className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
+            >
+              Ask Doubt
+            </button>
+          </div>
           <div className="mt-2 flex gap-4 text-sm text-gray-500 font-medium">
             <span>Category: {selectedCourse?.category}</span>
             <span>Level: {selectedCourse?.level}</span>
@@ -59,10 +97,12 @@ function ViewLectures() {
         {/* video player */}
         <div className="aspect-video bg-black rounded-xl overflow-hidden mb-4 border border-gray-300">
           {selectedLecture?.videoUrl ? (
-            <video
-              className="w-full h-full object-contain"
+            <VideoPlayer
               src={selectedLecture?.videoUrl}
-              controls
+              lectureId={selectedLecture?._id}
+              courseId={courseId}
+              onProgressUpdate={handleProgressUpdate}
+              className="w-full h-full"
             />
           ) : (
             <div className="flex items-center justify-center h-full text-white">
@@ -85,11 +125,10 @@ function ViewLectures() {
               <button
                 key={index}
                 onClick={() => setSelectedLecture(lecture)}
-                className={`flex items-center justify-between p-3 rounded-lg border transition text-left ${
-                  selectedLecture?._id === lecture._id
+                className={`flex items-center justify-between p-3 rounded-lg border transition text-left ${selectedLecture?._id === lecture._id
                     ? "bg-gray-200 border-gray-500"
                     : "hover:bg-gray-50 border-gray-300"
-                }`}
+                  }`}
               >
                 <h2 className="text-sm font-semibold text-gray-800">
                   {lecture.lectureTitle}

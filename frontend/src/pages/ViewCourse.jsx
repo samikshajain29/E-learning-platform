@@ -14,6 +14,8 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import Card from "../component/Card";
 import { ClipLoader } from "react-spinners";
+import EnrollmentForm from "../component/EnrollmentForm";
+import WishlistButton from "../component/WishlistButton";
 function ViewCourse() {
   const navigate = useNavigate();
 
@@ -29,6 +31,9 @@ function ViewCourse() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showEnrollmentForm, setShowEnrollmentForm] = useState(false);
+  const [enrollmentData, setEnrollmentData] = useState(null);
+  const [hasReviewed, setHasReviewed] = useState(false); // Track if user has already reviewed
 
   const fetchCourseData = async () => {
     courseData.map((course) => {
@@ -81,17 +86,25 @@ function ViewCourse() {
     if (creatorData?._id && courseData.length > 0) {
       const creatorCourse = courseData.filter(
         (course) =>
-          course.creator === creatorData?._id && course._id !== courseId
+          (typeof course.creator === 'object' ? course.creator._id : course.creator)?.toString() === creatorData?._id?.toString() && course._id !== courseId
       );
       setCreatorCourses(creatorCourse);
     }
-  }, [creatorData, courseData]);
+  }, [creatorData, courseData, courseId]);
 
   const handleEnroll = async (userId, courseId) => {
+    // Show enrollment form modal
+    setShowEnrollmentForm(true);
+  };
+
+  const handleEnrollmentFormSubmit = async (formData) => {
+    setLoading(true);
+    setEnrollmentData(formData);
+
     try {
       const orderData = await axios.post(
         serverUrl + "/api/order/razorpay-order",
-        { userId, courseId },
+        { userId: userData._id, courseId },
         { withCredentials: true }
       );
       console.log(orderData);
@@ -108,25 +121,49 @@ function ViewCourse() {
           try {
             const verifyPayment = await axios.post(
               serverUrl + "/api/order/verifypayment",
-              { ...response, courseId, userId },
+              {
+                ...response,
+                courseId,
+                userId: userData._id,
+                enrollmentData: formData // Include form data in verification
+              },
               { withCredentials: true }
             );
             setIsEnrolled(true);
+            setShowEnrollmentForm(false);
+            setLoading(false);
             toast.success(verifyPayment.data.message);
           } catch (error) {
+            setLoading(false);
+            setShowEnrollmentForm(false);
             toast.error(error.response.data.message);
           }
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+            setShowEnrollmentForm(false);
+            toast.info("Payment cancelled");
+          },
         },
       };
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
       console.log(error);
+      setLoading(false);
+      setShowEnrollmentForm(false);
       toast.error("Something went wrong while enrolling");
     }
   };
 
   const handleReview = async () => {
+    // Check if user has already reviewed to show appropriate message
+    if (hasReviewed) {
+      toast.warning("You have already reviewed this course");
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await axios.post(
@@ -143,6 +180,7 @@ function ViewCourse() {
       console.log(result.data);
       setRating(0);
       setComment("");
+      setHasReviewed(true); // Set reviewed status to true after successful review
     } catch (error) {
       console.log(error);
       setLoading(false);
@@ -151,6 +189,30 @@ function ViewCourse() {
       setComment("");
     }
   };
+
+  // Check if user has already reviewed this course
+  useEffect(() => {
+    if (userData?._id && selectedCourse?._id) {
+      const checkExistingReview = async () => {
+        try {
+          // Check if user has already reviewed this course by looking at course reviews
+          const existingReview = selectedCourse?.reviews?.find(
+            review => review.user?._id?.toString() === userData._id.toString()
+          );
+
+          if (existingReview) {
+            setHasReviewed(true);
+          } else {
+            setHasReviewed(false);
+          }
+        } catch (error) {
+          console.error("Error checking existing review:", error);
+        }
+      };
+
+      checkExistingReview();
+    }
+  }, [userData, selectedCourse]);
 
   const calculateAvgReview = (reviews) => {
     if (!reviews || reviews.length === 0) {
@@ -164,6 +226,18 @@ function ViewCourse() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
+      {/* Enrollment Form Modal */}
+      <EnrollmentForm
+        isOpen={showEnrollmentForm}
+        onClose={() => {
+          setShowEnrollmentForm(false);
+          setLoading(false);
+        }}
+        onSubmit={handleEnrollmentFormSubmit}
+        loading={loading}
+        userData={userData}
+      />
+
       <div className="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-6 space-y-6 relative">
         {/* top section */}
 
@@ -176,14 +250,17 @@ function ViewCourse() {
               onClick={() => navigate("/")}
             />
 
-            {selectedCourse?.thumbnail ? (
-              <img
-                src={selectedCourse?.thumbnail}
-                className="rounded-xl w-full object-cover"
-              />
-            ) : (
-              <img src={img} className="rounded-xl w-full object-cover" />
-            )}
+            <div className="relative">
+              <WishlistButton courseId={courseId} className="top-4 right-4" />
+              {selectedCourse?.thumbnail ? (
+                <img
+                  src={selectedCourse?.thumbnail}
+                  className="rounded-xl w-full object-cover"
+                />
+              ) : (
+                <img src={img} className="rounded-xl w-full object-cover" />
+              )}
+            </div>
           </div>
 
           {/* courseinfo */}
@@ -217,20 +294,49 @@ function ViewCourse() {
                 <li>✔️ Lifetime access to course materials</li>
               </ul>
 
-              {!isEnrolled ? (
-                <button
-                  className="bg-black text-white px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
-                  onClick={() => handleEnroll(userData._id, courseId)}
-                >
-                  Enroll Now
-                </button>
-              ) : (
+              {/* Conditional logic based on user role and course ownership */}
+              {userData?.role === "educator" && selectedCourse?.creator?._id?.toString() === userData?._id?.toString() ? (
+                // Educator viewing their own course: Show "Watch Now" directly without payment
                 <button
                   className="bg-green-100 text-green-500 px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
                   onClick={() => navigate(`/viewlecture/${courseId}`)}
                 >
                   Watch Now
                 </button>
+              ) : userData?.role === "educator" ? (
+                // Educator viewing another educator's course: Treat like a student
+                !isEnrolled ? (
+                  <button
+                    className="bg-black text-white px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
+                    onClick={() => handleEnroll(userData._id, courseId)}
+                  >
+                    Enroll Now
+                  </button>
+                ) : (
+                  <button
+                    className="bg-green-100 text-green-500 px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
+                    onClick={() => navigate(`/viewlecture/${courseId}`)}
+                  >
+                    Watch Now
+                  </button>
+                )
+              ) : (
+                // Student: Show "Enroll Now" or "Watch Now" based on enrollment status
+                !isEnrolled ? (
+                  <button
+                    className="bg-black text-white px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
+                    onClick={() => handleEnroll(userData._id, courseId)}
+                  >
+                    Enroll Now
+                  </button>
+                ) : (
+                  <button
+                    className="bg-green-100 text-green-500 px-6 py-2 rounded hover:bg-gray-700 mt-3 cursor-pointer"
+                    onClick={() => navigate(`/viewlecture/${courseId}`)}
+                  >
+                    Watch Now
+                  </button>
+                )
               )}
             </div>
           </div>
@@ -263,33 +369,44 @@ function ViewCourse() {
             </p>
 
             <div className="flex flex-col gap-3">
-              {selectedCourse?.lectures?.map((lec, index) => (
-                <button
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 text-left ${
-                    lec.isPreviewFree
+              {selectedCourse?.lectures?.map((lec, index) => {
+                // Determine if lecture should be accessible
+                // Educator viewing own course: Always accessible
+                // Educator viewing other's course: Same as student (enrolled or preview)
+                // Student enrolled: Always accessible  
+                // Student not enrolled: Only if isPreviewFree
+                const isAccessible =
+                  (userData?.role === "educator" && selectedCourse?.creator?._id?.toString() === userData?._id?.toString()) ||
+                  isEnrolled ||
+                  lec.isPreviewFree;
+
+                return (
+                  <button
+                    key={index}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 text-left ${isAccessible
                       ? "hover:bg-gray-100 cursor-pointer border-gray-300"
                       : "cursor-not-allowed opacity-60 border-gray-200"
-                  } ${
-                    selectedLecture?.lectureTitle === lec.lectureTitle
-                      ? "bg-gray-100 border-gray-400"
-                      : ""
-                  }`}
-                  disabled={!lec.isPreviewFree}
-                  onClick={() => {
-                    if (lec.isPreviewFree) {
-                      setSelectedLecture(lec);
-                    }
-                  }}
-                >
-                  {" "}
-                  <span className="text-lg text-gray-700">
-                    {lec.isPreviewFree ? <IoIosPlayCircle /> : <FaLock />}
-                  </span>
-                  <span className="text-sm font-medium text-gray-800">
-                    {lec.lectureTitle}
-                  </span>
-                </button>
-              ))}
+                      } ${selectedLecture?.lectureTitle === lec.lectureTitle
+                        ? "bg-gray-100 border-gray-400"
+                        : ""
+                      }`}
+                    disabled={!isAccessible}
+                    onClick={() => {
+                      if (isAccessible) {
+                        setSelectedLecture(lec);
+                      }
+                    }}
+                  >
+                    {" "}
+                    <span className="text-lg text-gray-700">
+                      {isAccessible ? <IoIosPlayCircle /> : <FaLock />}
+                    </span>
+                    <span className="text-sm font-medium text-gray-800">
+                      {lec.lectureTitle}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -311,40 +428,60 @@ function ViewCourse() {
           </div>
         </div>
 
-        <div className="mt-8 border-t pt-6">
-          <h2 className="text-xl font-semibold mb-2">Write a Reviews</h2>
-          <div className="mb-4">
-            <div className="flex gap-1 mb-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <FaStar
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className={
-                    star <= rating ? "fill-amber-300" : "fill-gray-300"
-                  }
+        {/* Show review section only if user has access to "Watch Now" */}
+        {(userData?.role === "educator" && selectedCourse?.creator?._id?.toString() === userData?._id?.toString()) || isEnrolled ? (
+          <div className="mt-8 border-t pt-6">
+            <h2 className="text-xl font-semibold mb-2">Write a Review</h2>
+
+            {hasReviewed ? (
+              <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                <p className="text-green-700">You have already submitted a review for this course.</p>
+              </div>
+            ) : (
+              <div className="mb-4">
+                <div className="flex gap-1 mb-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar
+                      key={star}
+                      onClick={() => setRating(star)}
+                      className={
+                        star <= rating ? "fill-amber-300" : "fill-gray-300"
+                      }
+                    />
+                  ))}
+                </div>
+                <textarea
+                  onChange={(e) => setComment(e.target.value)}
+                  value={comment}
+                  className="w-full border border-gray-300 rounded-lg p-2"
+                  placeholder="Write your review here..."
+                  rows={3}
                 />
-              ))}
-            </div>
-            <textarea
-              onChange={(e) => setComment(e.target.value)}
-              value={comment}
-              className="w-full border border-gray-300 rounded-lg p-2"
-              placeholder="Write your review here..."
-              rows={3}
-            />
-            <button
-              className="bg-black text-white mt-3 px-4 py-2 rounded hover:bg-gray-800"
-              disabled={loading}
-              onClick={handleReview}
-            >
-              {loading ? (
-                <ClipLoader size={30} color="white" />
-              ) : (
-                "Submit Review"
-              )}
-            </button>
+                <button
+                  className={`${hasReviewed
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-black text-white hover:bg-gray-800"
+                    } mt-3 px-4 py-2 rounded`}
+                  disabled={loading || hasReviewed}
+                  onClick={handleReview}
+                >
+                  {loading ? (
+                    <ClipLoader size={30} color="white" />
+                  ) : hasReviewed ? (
+                    "Already Reviewed"
+                  ) : (
+                    "Submit Review"
+                  )}
+                </button>
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <div className="mt-8 border-t pt-6">
+            <p className="text-gray-600 italic">You must be enrolled in this course to submit a review.</p>
+          </div>
+        )}
+
         {/* For creator info */}
         <div className="flex items-center gap-4 pt-4 border-t">
           {creatorData?.photoUrl ? (
@@ -387,6 +524,7 @@ function ViewCourse() {
               title={course.title}
               category={course.category}
               reviews={course.reviews}
+              creator={course.creator}  // Pass creator information
             />
           ))}
         </div>

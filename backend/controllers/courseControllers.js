@@ -24,7 +24,7 @@ export const createCourse = async (req, res) => {
 export const getPublishedCourses = async (req, res) => {
   try {
     const courses = await Course.find({ isPublished: true }).populate(
-      "lectures reviews"
+      "lectures reviews creator"
     );
     if (!courses) {
       return res.status(400).json({ message: "Courses are not found" });
@@ -40,7 +40,7 @@ export const getPublishedCourses = async (req, res) => {
 export const getCreatorCourses = async (req, res) => {
   try {
     const userId = req.userId;
-    const courses = await Course.find({ creator: userId });
+    const courses = await Course.find({ creator: userId }).populate("creator");
     if (!courses) {
       return res.status(400).json({ message: "Courses are not found" });
     }
@@ -219,5 +219,151 @@ export const getCreatorById = async (req, res) => {
     return res.status(200).json(user);
   } catch (error) {
     return res.status(500).json({ message: `Failed to get creator ${error}` });
+  }
+};
+
+// NEW: Get courses by specific educator ID (for public profile viewing)
+export const getCoursesByEducatorId = async (req, res) => {
+  try {
+    const { educatorId } = req.params;
+    const courses = await Course.find({ creator: educatorId, isPublished: true })
+      .populate("creator")
+      .populate("reviews");
+    if (!courses) {
+      return res.status(404).json({ message: "Courses not found" });
+    }
+    return res.status(200).json(courses);
+  } catch (error) {
+    return res.status(500).json({
+      message: `Failed to get courses by educator ID: ${error.message}`,
+    });
+  }
+};
+
+// NEW: Get detailed dashboard statistics for educator
+export const getDashboardStats = async (req, res) => {
+  try {
+    const educatorId = req.userId;
+
+    // Get all courses by this educator with populated data
+    const courses = await Course.find({ creator: educatorId })
+      .populate({
+        path: "enrolledStudents",
+        select: "name email createdAt role",
+      })
+      .populate("lectures")
+      .lean();
+
+    if (!courses) {
+      return res.status(404).json({ message: "No courses found" });
+    }
+
+    // Calculate statistics
+    const totalCourses = courses.length;
+    const totalStudentsSet = new Set();
+    let totalEarnings = 0;
+
+    const courseStats = courses.map((course) => {
+      // Filter enrolledStudents to exclude the course creator (but include educators who purchased)
+      const enrolledStudentsAsStudents = course.enrolledStudents?.filter(student =>
+        student._id.toString() !== educatorId.toString()
+      ) || [];
+      const enrolledCount = enrolledStudentsAsStudents.length;
+      const revenue = (course.price || 0) * enrolledCount;
+      totalEarnings += revenue;
+
+      // Add unique students to set
+      enrolledStudentsAsStudents.forEach((student) => {
+        if (student && student._id) {
+          totalStudentsSet.add(student._id.toString());
+        }
+      });
+
+      return {
+        courseId: course._id,
+        courseName: course.title,
+        thumbnail: course.thumbnail,
+        price: course.price || 0,
+        lectureCount: course.lectures?.length || 0,
+        enrolledCount: enrolledCount,
+        revenue: revenue,
+        isPublished: course.isPublished,
+        students: enrolledStudentsAsStudents, // Include all enrolled users except creator
+        createdAt: course.createdAt,
+      };
+    });
+
+    return res.status(200).json({
+      totalCourses,
+      totalStudents: totalStudentsSet.size,
+      totalEarnings,
+      courseStats,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Failed to get dashboard statistics: ${error.message}`,
+    });
+  }
+};
+
+// NEW: Get student progress for a specific course
+export const getStudentProgress = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const educatorId = req.userId;
+
+    // Verify course belongs to this educator
+    const course = await Course.findOne({ _id: courseId, creator: educatorId })
+      .populate("lectures")
+      .lean();
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found or unauthorized" });
+    }
+
+    const totalLectures = course.lectures?.length || 0;
+
+    // Get all enrolled students with their progress (exclude the course creator/educator)
+    const students = await User.find({
+      enrolledCourses: courseId,
+      _id: { $ne: course.creator }, // Exclude the course creator from student list
+    })
+      .select("name email courseProgress createdAt role")
+      .lean();
+
+    // Calculate progress for each student
+    const studentProgress = students.map((student) => {
+      // Find progress for this specific course
+      const progress = student.courseProgress?.find(
+        (p) => p.courseId.toString() === courseId
+      );
+
+      const completedCount = progress?.completedLectures?.length || 0;
+      const completionPercentage = totalLectures > 0
+        ? Math.round((completedCount / totalLectures) * 100)
+        : 0;
+
+      return {
+        studentId: student._id,
+        studentName: student.name,
+        studentEmail: student.email,
+        enrolledAt: student.createdAt,
+        completedLectures: completedCount,
+        totalLectures: totalLectures,
+        completionPercentage: completionPercentage,
+        lastAccessed: progress?.lastAccessed || null,
+      };
+    });
+
+    return res.status(200).json({
+      courseId: course._id,
+      courseName: course.title,
+      totalLectures: totalLectures,
+      studentProgress: studentProgress,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Failed to get student progress: ${error.message}`,
+    });
   }
 };

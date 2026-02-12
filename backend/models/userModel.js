@@ -32,6 +32,45 @@ const userSchema = new mongoose.Schema(
         ref: "Course",
       },
     ],
+    courseProgress: [
+      {
+        courseId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Course",
+        },
+        completedLectures: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Lecture",
+          },
+        ],
+        lastAccessed: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    phone: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    city: {
+      type: String,
+    },
+    state: {
+      type: String,
+    },
+    zipCode: {
+      type: String,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+    education: {
+      type: String,
+    },
     resetOtp: {
       type: String,
     },

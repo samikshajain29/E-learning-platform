@@ -1,15 +1,37 @@
 import Course from "../models/courseModel.js";
 import Review from "../models/reviewModel.js";
+import User from "../models/userModel.js";
 
 export const createReview = async (req, res) => {
   try {
     const { rating, comment, courseId } = req.body;
     const userId = req.userId;
 
+    // Check if the course exists
     const course = await Course.findById(courseId);
     if (!course) {
       return res.status(400).json({ message: "Course is not found" });
     }
+
+    // Check if the user is enrolled in the course
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(400).json({ message: "User is not found" });
+    }
+
+    // Check if the user is enrolled in the course
+    const isEnrolled = user.enrolledCourses.some(enrolledCourse =>
+      enrolledCourse.toString() === courseId.toString()
+    );
+
+    // Additionally, allow course creator to review their own course
+    const isCourseCreator = course.creator.toString() === userId.toString();
+
+    if (!isEnrolled && !isCourseCreator) {
+      return res.status(400).json({ message: "You must be enrolled in this course to submit a review" });
+    }
+
+    // Check if user already reviewed this course
     const alreadyReviewed = await Review.findOne({
       course: courseId,
       user: userId,
@@ -19,6 +41,7 @@ export const createReview = async (req, res) => {
         .status(400)
         .json({ message: "You have already reviewed this course" });
     }
+
     const review = new Review({
       course: courseId,
       user: userId,

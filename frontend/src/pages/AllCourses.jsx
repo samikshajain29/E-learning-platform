@@ -10,6 +10,7 @@ function AllCourses() {
   const navigate = useNavigate();
   const { courseData } = useSelector((state) => state.course);
   const [category, setCategory] = useState([]);
+  const [educator, setEducator] = useState([]); // New state for educator filtering
   const [filterCourses, setFilterCourses] = useState([]);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
@@ -21,11 +22,30 @@ function AllCourses() {
     }
   };
 
+  // New function for educator filtering
+  const toggleEducator = (e) => {
+    if (educator.includes(e.target.value)) {
+      setEducator((prev) => prev.filter((c) => c !== e.target.value));
+    } else {
+      setEducator((prev) => [...prev, e.target.value]);
+    }
+  };
+
   const applyFilter = () => {
     let courseCopy = courseData?.slice();
+
+    // Apply category filter (existing logic)
     if (category.length > 0) {
       courseCopy = courseCopy?.filter((c) => category.includes(c.category));
     }
+
+    // Apply educator filter (new logic)
+    if (educator.length > 0) {
+      courseCopy = courseCopy?.filter((c) =>
+        educator.includes(c.creator?._id?.toString())
+      );
+    }
+
     setFilterCourses(courseCopy);
   };
 
@@ -35,7 +55,12 @@ function AllCourses() {
 
   useEffect(() => {
     applyFilter();
-  }, [category]);
+  }, [category, educator]); // Added educator dependency
+
+  // Get unique educators from course data
+  const uniqueEducators = [...new Map(
+    (courseData || []).map(course => [course.creator?._id, course.creator])
+  ).values()].filter(Boolean);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -49,9 +74,8 @@ function AllCourses() {
 
       {/* sidebar */}
       <aside
-        className={`w-[260px] h-screen overflow-y-auto bg-black fixed top-0 left-0 p-6 py-[130px] border-r border-gray-200 shadow-md transition-transform duration-300 z-5 ${
-          isSidebarVisible ? "translate-x-0" : "-translate-x-full"
-        } md:block md:translate-x-0`}
+        className={`w-[260px] h-screen overflow-y-auto bg-black fixed top-0 left-0 p-6 py-[130px] border-r border-gray-200 shadow-md transition-transform duration-300 z-5 ${isSidebarVisible ? "translate-x-0" : "-translate-x-full"
+          } md:block md:translate-x-0`}
       >
         <h2 className="text-xl font-bold flex items-center justify-center gap-2 text-gray-50 mb-6">
           <FaArrowLeftLong
@@ -73,6 +97,9 @@ function AllCourses() {
             Search with AI
             <img src={ai} alt="" className="w-[30px] h-[30px] rounded-full" />
           </button>
+
+          {/* Category Filters (existing) */}
+          <div className="font-bold text-white mt-4">Categories:</div>
           <label
             htmlFor=""
             className="flex items-center gap-3 cursor-pointer hover:text-gray-200 transition"
@@ -181,6 +208,24 @@ function AllCourses() {
             />
             Others
           </label>
+
+          {/* Educator Filters (new) */}
+          <div className="font-bold text-white mt-6">Educators:</div>
+          {uniqueEducators.map((edu) => (
+            <label
+              key={edu._id}
+              htmlFor=""
+              className="flex items-center gap-3 cursor-pointer hover:text-gray-200 transition"
+            >
+              <input
+                type="checkbox"
+                className="accent-black w-4 h-4 rounded-md"
+                value={edu._id}
+                onChange={toggleEducator}
+              />
+              {edu.name}
+            </label>
+          ))}
         </form>
       </aside>
       <main className="w-full transition-all duration-300 py-[130px] md:pl-[300px] flex items-start justify-center md:justify-start flex-wrap gap-6 px-[10px]">
@@ -193,6 +238,7 @@ function AllCourses() {
             price={course.price}
             id={course._id}
             reviews={course.reviews}
+            creator={course.creator}  // Pass creator information
           />
         ))}
       </main>

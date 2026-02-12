@@ -28,6 +28,7 @@ function CardPage() {
             price={course.price}
             id={course._id}
             reviews={course.reviews}
+            creator={course.creator}  // Pass creator information
           />
         ))}
       </div>

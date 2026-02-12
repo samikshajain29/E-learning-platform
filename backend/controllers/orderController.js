@@ -32,19 +32,60 @@ export const RazorpayOrder = async (req, res) => {
 
 export const verifyPayment = async (req, res) => {
   try {
-    const { courseId, userId, razorpay_order_id } = req.body;
+    const { courseId, userId, razorpay_order_id, enrollmentData } = req.body;
     const orderInfo = await RazorPayInstance.orders.fetch(razorpay_order_id);
+
     if (orderInfo.status === "paid") {
       const user = await User.findById(userId);
+      const course = await Course.findById(courseId).populate("lectures");
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // Update user enrollment
       if (!user.enrolledCourses.includes(courseId)) {
-        await user.enrolledCourses.push(courseId);
+        user.enrolledCourses.push(courseId);
+
+        // Update user's enrollment information if provided
+        if (enrollmentData) {
+          if (enrollmentData.phone) user.phone = enrollmentData.phone;
+          if (enrollmentData.address) user.address = enrollmentData.address;
+          if (enrollmentData.city) user.city = enrollmentData.city;
+          if (enrollmentData.state) user.state = enrollmentData.state;
+          if (enrollmentData.zipCode) user.zipCode = enrollmentData.zipCode;
+          if (enrollmentData.dateOfBirth) user.dateOfBirth = enrollmentData.dateOfBirth;
+          if (enrollmentData.education) user.education = enrollmentData.education;
+        }
+
         await user.save();
       }
-      const course = await Course.findById(courseId).populate("lectures");
+
+      // Update course enrollment
       if (!course.enrolledStudents.includes(userId)) {
-        await course.enrolledStudents.push(userId);
+        course.enrolledStudents.push(userId);
         await course.save();
       }
+
+      // Send notifications asynchronously (won't block response)
+      setImmediate(async () => {
+        try {
+          const sendNotifications = (await import("../utils/notificationService.js")).sendEnrollmentNotifications;
+          await sendNotifications({
+            userEmail: user.email,
+            userName: user.name,
+            userPhone: user.phone,
+            courseName: course.title,
+          });
+        } catch (error) {
+          console.error("Notification error:", error.message);
+        }
+      });
+
       return res
         .status(200)
         .json({ message: "Payment verified and enrollment successful" });

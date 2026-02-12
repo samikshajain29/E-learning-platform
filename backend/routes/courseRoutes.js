@@ -8,9 +8,12 @@ import {
   getCourseLecture,
   getCreatorById,
   getCreatorCourses,
+  getDashboardStats,
+  getStudentProgress,
   getPublishedCourses,
   removeCourse,
   removeLecture,
+  getCoursesByEducatorId, // NEW: Added for public educator profile viewing
 } from "../controllers/courseControllers.js";
 import isAuth from "../middlewares/isAuth.js";
 import upload from "../middlewares/multer.js";
@@ -21,6 +24,9 @@ const courseRouter = express.Router();
 courseRouter.post("/create", isAuth, createCourse);
 courseRouter.get("/getpublished", getPublishedCourses);
 courseRouter.get("/getcreator", isAuth, getCreatorCourses);
+courseRouter.get("/getcreator/:educatorId", getCoursesByEducatorId); // NEW: Public endpoint for educator profiles
+courseRouter.get("/dashboard-stats", isAuth, getDashboardStats);
+courseRouter.get("/student-progress/:courseId", isAuth, getStudentProgress);
 courseRouter.post(
   "/editcourse/:courseId",
   isAuth,

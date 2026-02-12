@@ -24,6 +24,8 @@ import ViewLectures from "./pages/ViewLectures";
 import MyEnrolledCourses from "./pages/MyEnrolledCourses";
 import getAllReviews from "./customHooks/getAllReviews";
 import SearchWithAi from "./pages/SearchWithAi";
+import EducatorProfile from "./pages/EducatorProfile"; // Import the new component
+import WishlistPage from "./pages/WishlistPage";
 export const serverUrl = "http://localhost:8000";
 
 function App() {
@@ -137,6 +139,15 @@ function App() {
         <Route
           path="/search"
           element={userData ? <SearchWithAi /> : <Navigate to={"/signup"} />}
+        />
+        {/* New route for Educator Profile */}
+        <Route
+          path="/educator/:educatorId"
+          element={userData ? <EducatorProfile /> : <Navigate to={"/signup"} />}
+        />
+        <Route
+          path="/wishlist"
+          element={userData ? <WishlistPage /> : <Navigate to={"/signup"} />}
         />
       </Routes>
     </>
