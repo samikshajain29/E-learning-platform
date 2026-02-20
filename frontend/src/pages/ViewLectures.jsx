@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { IoIosPlayCircle } from "react-icons/io";
 import { serverUrl } from "../App";
 import VideoPlayer from "../component/VideoPlayer";
+import LectureQuestionSection from "../component/LectureQuestionSection";
 
 function ViewLectures() {
   const { courseId } = useParams();
@@ -85,7 +86,7 @@ function ViewLectures() {
               }
               className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
             >
-              Ask Doubt
+              Ask Doubt with AI
             </button>
           </div>
           <div className="mt-2 flex gap-4 text-sm text-gray-500 font-medium">
@@ -115,6 +116,17 @@ function ViewLectures() {
             {selectedLecture?.lectureTitle}
           </h2>
         </div>
+
+        {/* Questions Section */}
+        {selectedLecture && (
+          <LectureQuestionSection
+            lectureId={selectedLecture._id}
+            courseId={courseId}
+            courseCreatorId={
+              selectedCourse?.creator?._id || selectedCourse?.creator
+            }
+          />
+        )}
       </div>
       {/* right or bottom */}
       <div className="w-full md:w-1/3 bg-white rounded-2xl shadow-md p-6 border border-gray-200 h-fit">
@@ -125,10 +137,11 @@ function ViewLectures() {
               <button
                 key={index}
                 onClick={() => setSelectedLecture(lecture)}
-                className={`flex items-center justify-between p-3 rounded-lg border transition text-left ${selectedLecture?._id === lecture._id
+                className={`flex items-center justify-between p-3 rounded-lg border transition text-left ${
+                  selectedLecture?._id === lecture._id
                     ? "bg-gray-200 border-gray-500"
                     : "hover:bg-gray-50 border-gray-300"
-                  }`}
+                }`}
               >
                 <h2 className="text-sm font-semibold text-gray-800">
                   {lecture.lectureTitle}

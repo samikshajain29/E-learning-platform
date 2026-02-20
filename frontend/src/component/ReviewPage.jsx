@@ -24,11 +24,11 @@ function ReviewPage() {
         {latestReview?.map((review, index) => (
           <ReviewCard
             key={index}
-            comment={review.comment}
-            photoUrl={review.user.photoUrl}
-            rating={review.rating}
-            courseTitle={review.course.title}
-            description={review.user.description}
+            comment={review?.comment}
+            photoUrl={review?.user?.photoUrl}
+            rating={review?.rating}
+            courseTitle={review?.course?.title}
+            description={review?.user?.description}
             name={review.user.name}
           />
         ))}

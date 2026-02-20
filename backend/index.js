@@ -11,6 +11,7 @@ import paymentRouter from "./routes/paymentRoutes.js";
 import reviewRouter from "./routes/reviewRoute.js";
 import wishlistRouter from "./routes/wishlistRoutes.js";
 import progressRouter from "./routes/progressRoutes.js";
+import lectureQuestionRouter from "./routes/lectureQuestionRoutes.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -31,8 +32,11 @@ app.use("/api/order", paymentRouter);
 app.use("/api/review", reviewRouter);
 app.use("/api/wishlist", wishlistRouter);
 app.use("/api/progress", progressRouter);
+app.use("/api/lecture-question", lectureQuestionRouter);
 
+connectDB();
+
+console.log(`Attempting to listen on port ${port}`);
 app.listen(port, () => {
-  console.log("server started");
-  connectDB();
+  console.log(`Server started on port ${port}`);
 });
