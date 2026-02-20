@@ -367,3 +367,47 @@ export const getStudentProgress = async (req, res) => {
     });
   }
 };
+
+// NEW: Update course status
+export const updateCourseStatus = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { status } = req.body;
+    const userId = req.userId;
+
+    // Validate required fields
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+
+    // Validate status value
+    if (!["ongoing", "completed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value. Must be 'ongoing' or 'completed'" });
+    }
+
+    // Find the course
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Check if user is the course creator
+    if (course.creator.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Only the course creator can update the status" });
+    }
+
+    // Update the status
+    course.status = status;
+    await course.save();
+
+    return res.status(200).json({
+      message: "Course status updated successfully",
+      status: course.status,
+      courseId: course._id
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: `Failed to update course status: ${error.message}`,
+    });
+  }
+};

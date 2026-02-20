@@ -52,6 +52,11 @@ const courseSchema = new mongoose.Schema(
         ref: "Review",
       },
     ],
+    status: {
+      type: String,
+      enum: ["ongoing", "completed"],
+      default: "ongoing",
+    },
   },
   { timestamps: true }
 );

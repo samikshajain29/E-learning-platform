@@ -268,6 +268,12 @@ function ViewCourse() {
           <div className="flex-1 space-y-2 my-[20px]">
             <h2 className="text-2xl font-bold">{selectedCourse?.title}</h2>
             <p className="text-gray-600">{selectedCourse?.subTitle}</p>
+            {/* Course Status Display */}
+            <div className="mt-2">
+              <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${selectedCourse?.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                Status: {selectedCourse?.status?.charAt(0).toUpperCase() + selectedCourse?.status?.slice(1) || 'Ongoing'}
+              </span>
+            </div>
 
             <div className="flex items-start flex-col justify-between">
               <div className="text-yellow-500 font-medium flex gap-2">

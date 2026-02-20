@@ -130,18 +130,25 @@ function ViewLectures() {
       </div>
       {/* right or bottom */}
       <div className="w-full md:w-1/3 bg-white rounded-2xl shadow-md p-6 border border-gray-200 h-fit">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">All Lectures</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">All Lectures</h2>
+          {/* Course Status Display */}
+          <div className="mt-2">
+            <span className={`inline-block px-3 py-1 mb-5 flex text-sm font-medium rounded-full ${selectedCourse?.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+              Status: {selectedCourse?.status?.charAt(0).toUpperCase() + selectedCourse?.status?.slice(1) || 'Ongoing'}
+            </span>
+          </div>
+        </div>
         <div className="flex flex-col gap-3 mb-6">
           {selectedCourse?.lectures?.length > 0 ? (
             selectedCourse?.lectures?.map((lecture, index) => (
               <button
                 key={index}
                 onClick={() => setSelectedLecture(lecture)}
-                className={`flex items-center justify-between p-3 rounded-lg border transition text-left ${
-                  selectedLecture?._id === lecture._id
-                    ? "bg-gray-200 border-gray-500"
-                    : "hover:bg-gray-50 border-gray-300"
-                }`}
+                className={`flex items-center justify-between p-3 rounded-lg border transition text-left ${selectedLecture?._id === lecture._id
+                  ? "bg-gray-200 border-gray-500"
+                  : "hover:bg-gray-50 border-gray-300"
+                  }`}
               >
                 <h2 className="text-sm font-semibold text-gray-800">
                   {lecture.lectureTitle}

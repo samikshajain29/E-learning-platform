@@ -26,6 +26,7 @@ function EditCourse() {
   const [backendImage, setBackendImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loading1, setLoading1] = useState(false);
+  const [status, setStatus] = useState("ongoing");
   const dispatch = useDispatch();
   const { courseData } = useSelector((state) => state.course);
 
@@ -57,6 +58,7 @@ function EditCourse() {
       setPrice(selectCourse.price || "");
       setFrontendImage(selectCourse.thumbnail || img);
       setIsPublished(selectCourse?.isPublished);
+      setStatus(selectCourse?.status || "ongoing");
     }
   }, [selectCourse]);
   useEffect(() => {
@@ -74,6 +76,7 @@ function EditCourse() {
     formData.append("price", price);
     formData.append("thumbnail", backendImage);
     formData.append("isPublished", isPublished);
+    formData.append("status", status);
     try {
       const result = await axios.post(
         serverUrl + `/api/course/editcourse/${courseId}`,
@@ -123,6 +126,22 @@ function EditCourse() {
       toast.error(error.response.data.message);
     }
   };
+
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      const result = await axios.put(
+        serverUrl + `/api/course/status/${courseId}`,
+        { status: newStatus },
+        { withCredentials: true }
+      );
+      console.log(result.data);
+      setStatus(newStatus);
+      toast.success("Course status updated successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to update status");
+    }
+  };
   return (
     <div className="max-w-5xl mx-auto p-6 mt-10 bg-white rounded-lg shadow-md">
       {/* top bar */}
@@ -144,36 +163,58 @@ function EditCourse() {
         </div>
       </div>
       {/* form details page */}
-      <div className="bg-gray-50 p-6 rounded-md ">
-        <h2 className="text-lg font-medium mb-4">Basic Course Information</h2>
-        <div className="space-x-2 space-y-2">
-          {!isPublished ? (
-            <button
-              className="bg-green-100 text-green-600 px-4 py-2 rounded-md border-1"
-              onClick={() => setIsPublished((prev) => !prev)}
-            >
-              Click to Publish
-            </button>
-          ) : (
-            <button
-              className="bg-red-100 text-red-600 px-4 py-2 rounded-md border-1"
-              onClick={() => setIsPublished((prev) => !prev)}
-            >
-              Click to UnPublish
-            </button>
-          )}
-          <button
-            className="bg-red-600 text-white px-4 py-2 rounded-md"
-            onClick={handleRemoveCourse}
-          >
-            {loading1 ? (
-              <ClipLoader size={30} color="white" />
-            ) : (
-              "Remove Course"
-            )}
-          </button>
-        </div>
+      <div className="bg-gray-50 p-6 rounded-md">
+        <h2 className="text-lg font-medium mb-6">Basic Course Information</h2>
 
+        {/* Top Controls Row */}
+        <div className="flex justify-between items-start flex-wrap gap-4">
+
+          {/* Left Side Buttons */}
+          <div className="flex gap-3 flex-wrap">
+            {!isPublished ? (
+              <button
+                className="bg-green-100 text-green-600 px-4 py-2 rounded-md border border-green-300 hover:bg-green-200 transition"
+                onClick={() => setIsPublished((prev) => !prev)}
+              >
+                Click to Publish
+              </button>
+            ) : (
+              <button
+                className="bg-red-100 text-red-600 px-4 py-2 rounded-md border border-red-300 hover:bg-red-200 transition"
+                onClick={() => setIsPublished((prev) => !prev)}
+              >
+                Click to UnPublish
+              </button>
+            )}
+
+            <button
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+              onClick={handleRemoveCourse}
+            >
+              {loading1 ? (
+                <ClipLoader size={30} color="white" />
+              ) : (
+                "Remove Course"
+              )}
+            </button>
+          </div>
+
+          {/* Right Side Status Dropdown */}
+          <div className="min-w-[200px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1 mt-[5px]">
+              Course Status
+            </label>
+            <select
+              value={status}
+              onChange={(e) => handleStatusUpdate(e.target.value)}
+              className="border border-gray-300 px-3 py-2 rounded-md bg-white text-sm w-full focus:outline-none focus:ring-2 focus:ring-black"
+            >
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+        </div>
         <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
           <div>
             <label
@@ -333,7 +374,7 @@ function EditCourse() {
           </div>
         </form>
       </div>
-    </div>
+    </div >
   );
 }
 

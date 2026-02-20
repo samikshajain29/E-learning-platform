@@ -14,6 +14,7 @@ import {
   removeCourse,
   removeLecture,
   getCoursesByEducatorId, // NEW: Added for public educator profile viewing
+  updateCourseStatus, // NEW: Added for course status update
 } from "../controllers/courseControllers.js";
 import isAuth from "../middlewares/isAuth.js";
 import upload from "../middlewares/multer.js";
@@ -51,5 +52,8 @@ courseRouter.post("/creator", isAuth, getCreatorById);
 
 //for search
 courseRouter.post("/search", searchWithAi);
+
+// NEW: Update course status (only creator can update)
+courseRouter.put("/status/:courseId", isAuth, updateCourseStatus);
 
 export default courseRouter;
