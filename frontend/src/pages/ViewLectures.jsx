@@ -297,8 +297,8 @@ function ViewLectures() {
                   onClick={() => allLecturesCompleted && setShowAttempt(true)}
                   disabled={!allLecturesCompleted}
                   className={`w-full px-5 py-3 rounded-md transition font-medium text-sm ${allLecturesCompleted
-                      ? "bg-blue-600 text-white hover:bg-blue-700"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
                     }`}
                 >
                   📝 Attempt Assignment
@@ -447,8 +447,8 @@ function ViewLectures() {
                       <label
                         key={optIndex}
                         className={`flex items-center gap-3 p-4 rounded-md border cursor-pointer transition ${selectedAnswers[q._id] === option
-                            ? "bg-blue-50 border-blue-500"
-                            : "bg-white border-gray-200 hover:bg-gray-50"
+                          ? "bg-blue-50 border-blue-500"
+                          : "bg-white border-gray-200 hover:bg-gray-50"
                           }`}
                       >
                         <input
