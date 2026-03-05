@@ -97,7 +97,7 @@ export const generateCertificate = async (req, res) => {
 // Helper function to generate and send PDF
 const sendCertificatePDF = async (res, certificate) => {
     try {
-        // Create a temporary directory if it doesn't exist
+
         const tempDir = path.join(__dirname, "..", "temp");
         if (!fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir, { recursive: true });
@@ -105,91 +105,117 @@ const sendCertificatePDF = async (res, certificate) => {
 
         const filePath = path.join(tempDir, `certificate_${certificate.certificateId}.pdf`);
 
-        // Create PDF document
         const doc = new PDFDocument({
             layout: "landscape",
             size: "A4",
             margins: {
-                top: 50,
-                bottom: 50,
-                left: 50,
-                right: 50,
+                top: 40,
+                bottom: 40,
+                left: 40,
+                right: 40,
             },
         });
 
-        // Pipe to file
         const stream = fs.createWriteStream(filePath);
         doc.pipe(stream);
 
-        // Draw border
-        doc.lineWidth(10);
-        doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).stroke("#1e40af");
+        const pageWidth = doc.page.width;
+        const pageHeight = doc.page.height;
 
-        // Draw decorative corners
-        doc.lineWidth(3);
-        doc.rect(30, 30, doc.page.width - 60, doc.page.height - 60).stroke("#3b82f6");
+        // Proper centered container
+        const containerWidth = pageWidth * 0.8;
+        const containerX = (pageWidth - containerWidth) / 2;
 
-        // Title - CERTIFICATE OF COMPLETION
-        doc
-            .fontSize(48)
-            .font("Helvetica-Bold")
-            .fillColor("#1e3a8a")
-            .text("CERTIFICATE", 0, 150, {
-                align: "center",
-            })
-            .fontSize(32)
-            .font("Helvetica")
-            .fillColor("#374151")
-            .text("OF COMPLETION", 0, 210, {
-                align: "center",
-            });
+        // Decorative borders
+        doc.lineWidth(6);
+        doc.rect(20, 20, pageWidth - 40, pageHeight - 40).stroke("#1e40af");
 
-        // Subtitle
-        doc
-            .fontSize(16)
-            .font("Helvetica")
-            .fillColor("#6b7280")
-            .text("This is to certify that", 0, 280, {
-                align: "center",
-            });
+        doc.lineWidth(2);
+        doc.rect(30, 30, pageWidth - 60, pageHeight - 60).stroke("#3b82f6");
 
-        // Student Name
+        let y = 100;
+
+        // Title
         doc
             .fontSize(36)
             .font("Helvetica-Bold")
-            .fillColor("#1e40af")
-            .text(certificate.studentName, 0, 320, {
+            .fillColor("#1e3a8a")
+            .text("CERTIFICATE", containerX, y, {
+                width: containerWidth,
                 align: "center",
             });
 
-        // Course completion text
+        y += 40;
+
         doc
-            .fontSize(16)
+            .fontSize(24)
             .font("Helvetica")
             .fillColor("#374151")
-            .text("has successfully completed the course", 0, 390, {
+            .text("OF COMPLETION", containerX, y, {
+                width: containerWidth,
                 align: "center",
             });
 
-        // Course Title
+        y += 60;
+
+        doc
+            .fontSize(16)
+            .fillColor("#6b7280")
+            .text("This is to certify that", containerX, y, {
+                width: containerWidth,
+                align: "center",
+            });
+
+        y += 40;
+
         doc
             .fontSize(28)
             .font("Helvetica-Bold")
             .fillColor("#1e40af")
-            .text(certificate.courseTitle, 0, 430, {
+            .text(certificate.studentName, containerX, y, {
+                width: containerWidth,
                 align: "center",
             });
 
-        // Score section
+        y += 50;
+
         doc
-            .fontSize(18)
+            .fontSize(16)
             .font("Helvetica")
             .fillColor("#374151")
-            .text(`Assignment Score: ${certificate.score} / ${certificate.totalMarks} (${certificate.percentage}%)`, 0, 500, {
+            .text("has successfully completed the course", containerX, y, {
+                width: containerWidth,
                 align: "center",
             });
 
-        // Date and Certificate ID
+        y += 40;
+
+        doc
+            .fontSize(22)
+            .font("Helvetica-Bold")
+            .fillColor("#1e40af")
+            .text(certificate.courseTitle, containerX, y, {
+                width: containerWidth,
+                align: "center",
+            });
+
+        y += 40;
+
+        doc
+            .fontSize(16)
+            .fillColor("#374151")
+            .text(
+                `Assignment Score: ${certificate.score} / ${certificate.totalMarks} (${certificate.percentage}%)`,
+                containerX,
+                y,
+                {
+                    width: containerWidth,
+                    align: "center",
+                }
+            );
+
+        y += 40;
+
         const issueDate = new Date(certificate.issuedDate);
         const formattedDate = issueDate.toLocaleDateString("en-US", {
             year: "numeric",
@@ -199,39 +225,40 @@ const sendCertificatePDF = async (res, certificate) => {
 
         doc
             .fontSize(14)
-            .font("Helvetica")
             .fillColor("#6b7280")
-            .text(`Issued on: ${formattedDate}`, 100, 560, {
-                align: "left",
+            .text(`Issued on: ${formattedDate}`, containerX, y, {
+                width: containerWidth,
+                align: "center",
             });
+
+        y += 30;
 
         doc
-            .fontSize(14)
-            .font("Helvetica-Bold")
+            .fontSize(12)
             .fillColor("#6b7280")
-            .text(`Certificate ID: ${certificate.certificateId}`, doc.page.width - 400, 560, {
-                align: "right",
+            .text(`Certificate ID: ${certificate.certificateId}`, containerX, y, {
+                width: containerWidth,
+                align: "center",
             });
 
-        // Platform name at bottom
+        y += 40;
+
         doc
             .fontSize(20)
             .font("Helvetica-Bold")
             .fillColor("#1e40af")
-            .text("E-Learning Platform", 0, 600, {
+            .text("E-Learning Platform", containerX, y, {
+                width: containerWidth,
                 align: "center",
             });
 
-        // Finalize PDF
         doc.end();
 
-        // Wait for file to be written
         await new Promise((resolve, reject) => {
             stream.on("finish", resolve);
             stream.on("error", reject);
         });
 
-        // Send file
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader(
             "Content-Disposition",
@@ -241,12 +268,9 @@ const sendCertificatePDF = async (res, certificate) => {
         const fileStream = fs.createReadStream(filePath);
         fileStream.pipe(res);
 
-        // Clean up file after sending
         fileStream.on("close", () => {
             setTimeout(() => {
-                fs.unlink(filePath, (err) => {
-                    if (err) console.error("Error deleting temp file:", err);
-                });
+                fs.unlink(filePath, () => { });
             }, 1000);
         });
 
