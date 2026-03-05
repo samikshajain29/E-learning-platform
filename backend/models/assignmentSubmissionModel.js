@@ -2,8 +2,12 @@ import mongoose from "mongoose";
 
 const answerSchema = new mongoose.Schema(
     {
-        questionId: {
-            type: mongoose.Schema.Types.ObjectId,
+        questionIndex: {
+            type: Number,
+            required: true,
+        },
+        questionText: {
+            type: String,
             required: true,
         },
         selectedOption: {
@@ -39,17 +43,17 @@ const assignmentSubmissionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        totalQuestions: {
+        totalMarks: {
             type: Number,
             required: true,
-            default: 10,
+            default: 100,
         },
     },
     { timestamps: true }
 );
 
-// Prevent duplicate submissions (one attempt per student per course)
-assignmentSubmissionSchema.index({ courseId: 1, studentId: 1 }, { unique: true });
+// Prevent duplicate submissions (one attempt per student per assignment)
+assignmentSubmissionSchema.index({ assignmentId: 1, studentId: 1 }, { unique: true });
 
 const AssignmentSubmission = mongoose.model("AssignmentSubmission", assignmentSubmissionSchema);
 export default AssignmentSubmission;

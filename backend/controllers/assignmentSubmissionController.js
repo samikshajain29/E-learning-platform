@@ -22,30 +22,52 @@ export const submitAssignment = async (req, res) => {
 
         // Check if student has already submitted
         const existingSubmission = await AssignmentSubmission.findOne({
-            courseId,
+            assignmentId: assignment._id,
             studentId
         });
         if (existingSubmission) {
-            return res.status(400).json({ message: "You have already submitted this assignment" });
+            return res.status(400).json({
+                message: "You have already attempted the assignment.",
+                previousScore: existingSubmission.score,
+                totalMarks: existingSubmission.totalMarks
+            });
         }
 
-        // Validate answers count
+        // Validate answers count - must answer all questions
         if (answers.length !== assignment.questions.length) {
-            return res.status(400).json({ message: `Please answer all ${assignment.questions.length} questions` });
+            return res.status(400).json({
+                message: `Please answer all ${assignment.questions.length} questions. You have answered ${answers.length} questions.`
+            });
         }
 
-        // Calculate score
-        let score = 0;
+        // Validate each answer has questionIndex and selectedOption
+        for (let i = 0; i < answers.length; i++) {
+            const answer = answers[i];
+            if (answer.questionIndex === undefined || !answer.selectedOption) {
+                return res.status(400).json({
+                    message: `Answer ${i + 1} is missing question index or selected option`
+                });
+            }
+        }
+
+        // Calculate score (each question = 10 marks, total = 100)
+        let correctAnswers = 0;
         const formattedAnswers = answers.map((answer) => {
-            const question = assignment.questions.id(answer.questionId);
+            // Get the question from assignment using the index
+            const question = assignment.questions[answer.questionIndex];
             if (question && question.correctAnswer === answer.selectedOption) {
-                score++;
+                correctAnswers++;
             }
             return {
-                questionId: answer.questionId,
+                questionIndex: answer.questionIndex,
+                questionText: answer.questionText || (question ? question.question : ''),
                 selectedOption: answer.selectedOption,
             };
         });
+
+        // Each question = 10 marks, total = 100
+        const score = correctAnswers * 10;
+        const totalMarks = 100;
 
         // Create submission
         const submission = new AssignmentSubmission({
@@ -54,7 +76,7 @@ export const submitAssignment = async (req, res) => {
             studentId,
             answers: formattedAnswers,
             score,
-            totalQuestions: assignment.questions.length,
+            totalMarks,
         });
 
         await submission.save();
@@ -62,10 +84,11 @@ export const submitAssignment = async (req, res) => {
         return res.status(201).json({
             message: "Assignment submitted successfully",
             score,
-            totalQuestions: assignment.questions.length,
-            percentage: ((score / assignment.questions.length) * 100).toFixed(2),
+            totalMarks,
+            percentage: ((score / totalMarks) * 100).toFixed(2),
         });
     } catch (error) {
+        console.error("Assignment submission error:", error);
         return res.status(500).json({
             message: `Failed to submit assignment: ${error.message}`,
         });
@@ -78,8 +101,14 @@ export const getSubmissionStatus = async (req, res) => {
         const { courseId } = req.params;
         const studentId = req.userId;
 
+        // Find assignment for this course
+        const assignment = await Assignment.findOne({ courseId });
+        if (!assignment) {
+            return res.status(404).json({ message: "No assignment found for this course" });
+        }
+
         const submission = await AssignmentSubmission.findOne({
-            courseId,
+            assignmentId: assignment._id,
             studentId
         });
 
@@ -90,8 +119,8 @@ export const getSubmissionStatus = async (req, res) => {
         return res.status(200).json({
             submitted: true,
             score: submission.score,
-            totalQuestions: submission.totalQuestions,
-            percentage: ((submission.score / submission.totalQuestions) * 100).toFixed(2),
+            totalMarks: submission.totalMarks,
+            percentage: ((submission.score / submission.totalMarks) * 100).toFixed(2),
             submittedAt: submission.createdAt,
         });
     } catch (error) {

@@ -25,6 +25,7 @@ function ViewLectures() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [submissionScore, setSubmissionScore] = useState(null);
   const [allLecturesCompleted, setAllLecturesCompleted] = useState(false);
+  const [certificateEligible, setCertificateEligible] = useState(false);
 
   // Check if user is enrolled in this course
   const isEnrolled = userData?.enrolledCourses?.some(
@@ -120,6 +121,9 @@ function ViewLectures() {
         if (result.data.submitted) {
           setHasSubmitted(true);
           setSubmissionScore(result.data);
+
+          // Check certificate eligibility
+          checkCertificateEligibility();
         }
       } catch (error) {
         // No submission yet, that's okay
@@ -134,19 +138,61 @@ function ViewLectures() {
   }, [courseId]);
 
   // Handle answer selection
-  const handleAnswerSelect = (questionId, option) => {
+  const handleAnswerSelect = (questionIndex, option) => {
     setSelectedAnswers((prev) => ({
       ...prev,
-      [questionId]: option,
+      [questionIndex]: option,
     }));
+  };
+
+  // Check certificate eligibility
+  const checkCertificateEligibility = async () => {
+    try {
+      const result = await axios.get(
+        serverUrl + `/api/certificate/eligibility/${courseId}`,
+        { withCredentials: true }
+      );
+      setCertificateEligible(result.data.eligible);
+    } catch (error) {
+      console.log("Could not check certificate eligibility");
+      setCertificateEligible(false);
+    }
+  };
+
+  // Download certificate
+  const handleDownloadCertificate = async () => {
+    try {
+      const response = await axios.get(
+        serverUrl + `/api/certificate/${courseId}`,
+        {
+          withCredentials: true,
+          responseType: 'blob'
+        }
+      );
+
+      // Create blob and download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Certificate_${userData?.name || 'Student'}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      alert("Certificate downloaded successfully!");
+    } catch (error) {
+      console.error("Certificate download error:", error);
+      alert(error.response?.data?.message || "Failed to download certificate");
+    }
   };
 
   // Handle assignment submission
   const handleSubmitAssignment = async () => {
-    // Validate all questions are answered
-    const questionIds = assignment.questions.map((q) => q._id);
-    for (const id of questionIds) {
-      if (!selectedAnswers[id]) {
+    // Validate all questions are answered - use index-based approach
+    for (let i = 0; i < assignment.questions.length; i++) {
+      if (!selectedAnswers[i]) {
         alert("Please answer all questions before submitting");
         return;
       }
@@ -157,9 +203,11 @@ function ViewLectures() {
     }
 
     try {
-      const answers = questionIds.map((id) => ({
-        questionId: id,
-        selectedOption: selectedAnswers[id],
+      // Map answers using question index instead of non-existent _id
+      const answers = assignment.questions.map((q, index) => ({
+        questionIndex: index,
+        questionText: q.question,
+        selectedOption: selectedAnswers[index],
       }));
 
       const result = await axios.post(
@@ -171,11 +219,15 @@ function ViewLectures() {
       setHasSubmitted(true);
       setSubmissionScore({
         score: result.data.score,
-        totalQuestions: result.data.totalQuestions,
+        totalMarks: result.data.totalMarks,
         percentage: result.data.percentage,
       });
       setShowAttempt(false);
-      alert(`Assignment submitted successfully! Score: ${result.data.score}/${result.data.totalQuestions}`);
+
+      // Check certificate eligibility
+      checkCertificateEligibility();
+
+      alert(`Assignment submitted successfully! Score: ${result.data.score}/${result.data.totalMarks}`);
     } catch (error) {
       alert(error.response?.data?.message || "Failed to submit assignment");
     }
@@ -304,13 +356,30 @@ function ViewLectures() {
                   📝 Attempt Assignment
                 </button>
               ) : (
-                <div className="text-center p-4 bg-green-50 border border-green-200 rounded-md">
-                  <p className="text-sm font-semibold text-green-800 mb-1">
-                    ✓ Assignment Submitted
-                  </p>
-                  <p className="text-xs text-green-700">
-                    Score: {submissionScore?.score}/{submissionScore?.totalQuestions} ({submissionScore?.percentage}%)
-                  </p>
+                <div className="space-y-3">
+                  <div className="text-center p-4 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-sm font-semibold text-green-800 mb-1">
+                      ✓ Assignment Submitted
+                    </p>
+                    <p className="text-xs text-green-700">
+                      Score: {submissionScore?.score}/{submissionScore?.totalMarks} ({submissionScore?.percentage}%)
+                    </p>
+                  </div>
+
+                  {certificateEligible && (
+                    <button
+                      onClick={handleDownloadCertificate}
+                      className="w-full px-5 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium text-sm flex items-center justify-center gap-2"
+                    >
+                      📄 Download Certificate
+                    </button>
+                  )}
+
+                  {!certificateEligible && submissionScore?.score < 40 && (
+                    <p className="text-xs text-red-600 mt-2 text-center font-medium">
+                      ⚠️ Score must be at least 40% to download certificate
+                    </p>
+                  )}
                 </div>
               )}
               {!allLecturesCompleted && (
@@ -446,17 +515,17 @@ function ViewLectures() {
                     {q.options.map((option, optIndex) => (
                       <label
                         key={optIndex}
-                        className={`flex items-center gap-3 p-4 rounded-md border cursor-pointer transition ${selectedAnswers[q._id] === option
+                        className={`flex items-center gap-3 p-4 rounded-md border cursor-pointer transition ${selectedAnswers[index] === option
                           ? "bg-blue-50 border-blue-500"
                           : "bg-white border-gray-200 hover:bg-gray-50"
                           }`}
                       >
                         <input
                           type="radio"
-                          name={`question-${q._id}`}
+                          name={`question-${index}`}
                           value={option}
-                          checked={selectedAnswers[q._id] === option}
-                          onChange={() => handleAnswerSelect(q._id, option)}
+                          checked={selectedAnswers[index] === option}
+                          onChange={() => handleAnswerSelect(index, option)}
                           className="w-4 h-4 text-blue-600"
                         />
                         <span className="font-medium text-gray-700">
