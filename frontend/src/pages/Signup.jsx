@@ -128,17 +128,15 @@ function Signup() {
           </div>
           <div className="flex md:w-[50%] w-[70%] items-center justify-between">
             <span
-              className={`px-[10px] py-[5px] border-[2px] border-[#e7e6e6] rounded-xl cursor-pointer hover:border-black ${
-                role === "student" ? "border-[black]" : "border-[#646464]"
-              }`}
+              className={`px-[10px] py-[5px] border-[2px] border-[#e7e6e6] rounded-xl cursor-pointer hover:border-black ${role === "student" ? "border-[black]" : "border-[#646464]"
+                }`}
               onClick={() => setRole("student")}
             >
               Student
             </span>
             <span
-              className={`px-[10px] py-[5px] border-[2px] border-[#e7e6e6] rounded-xl cursor-pointer hover:border-black ${
-                role === "educator" ? "border-[black]" : "border-[#646464]"
-              }`}
+              className={`px-[10px] py-[5px] border-[2px] border-[#e7e6e6] rounded-xl cursor-pointer hover:border-black ${role === "educator" ? "border-[black]" : "border-[#646464]"
+                }`}
               onClick={() => setRole("educator")}
             >
               Educator
@@ -160,7 +158,7 @@ function Signup() {
             <div className="w-[25%] h-[0.5px] bg-[#c4c4c4]"></div>
           </div>
           <div
-            className="w-[80%] h-[40px] border-2 border-[gray] rounded-[5px] flex items-center justify-center"
+            className="w-[80%] h-[40px] border-2 border-[gray] rounded-[5px] flex items-center justify-center cursor-pointer"
             onClick={googleSignup}
           >
             <img src={google} alt="google" className="w-[25px]" />

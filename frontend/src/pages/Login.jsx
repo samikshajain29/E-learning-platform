@@ -138,7 +138,7 @@ function Login() {
             <div className="w-[25%] h-[0.5px] bg-[#c4c4c4]"></div>
           </div>
           <div
-            className="w-[80%] h-[40px] border-2 border-[gray] rounded-[5px] flex items-center justify-center"
+            className="w-[80%] h-[40px] border-2 border-[gray] rounded-[5px] flex items-center justify-center cursor-pointer"
             onClick={googleLogin}
           >
             <img src={google} alt="google" className="w-[25px]" />
