@@ -217,3 +217,48 @@ export const getLectureProgress = async (req, res) => {
         });
     }
 };
+
+// Get total completed lectures count for a course
+export const getCourseCompletionStatus = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const userId = req.userId;
+
+        if (!courseId) {
+            return res.status(400).json({
+                message: "Course ID is required"
+            });
+        }
+
+        // Count completed lectures for this user in this course
+        const completedLectures = await Progress.countDocuments({
+            userId,
+            courseId,
+            completed: true
+        });
+
+        // Get total lectures in the course
+        const course = await Course.findById(courseId).select('lectures');
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        const totalLectures = course.lectures?.length || 0;
+        const completionPercentage = totalLectures > 0
+            ? Math.round((completedLectures / totalLectures) * 100)
+            : 0;
+
+        return res.status(200).json({
+            completedLectures,
+            totalLectures,
+            completionPercentage,
+            isFullyCompleted: completedLectures === totalLectures && totalLectures > 0
+        });
+
+    } catch (error) {
+        console.error("Get course completion status error:", error);
+        return res.status(500).json({
+            message: `Failed to get course completion status: ${error.message}`
+        });
+    }
+};

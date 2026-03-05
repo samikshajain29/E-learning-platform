@@ -16,6 +16,8 @@ import {
   getCoursesByEducatorId, // NEW: Added for public educator profile viewing
   updateCourseStatus, // NEW: Added for course status update
 } from "../controllers/courseControllers.js";
+import { uploadAssignment, getAssignmentByCourseId } from "../controllers/assignmentController.js";
+import { submitAssignment, getSubmissionStatus } from "../controllers/assignmentSubmissionController.js";
 import isAuth from "../middlewares/isAuth.js";
 import upload from "../middlewares/multer.js";
 import { searchWithAi } from "../controllers/searchController.js";
@@ -55,5 +57,13 @@ courseRouter.post("/search", searchWithAi);
 
 // NEW: Update course status (only creator can update)
 courseRouter.put("/status/:courseId", isAuth, updateCourseStatus);
+
+// NEW: Assignment routes
+courseRouter.post("/assignment/:courseId", isAuth, uploadAssignment);
+courseRouter.get("/assignment/:courseId", getAssignmentByCourseId);
+
+// NEW: Assignment submission routes
+courseRouter.post("/assignment/submit/:courseId", isAuth, submitAssignment);
+courseRouter.get("/assignment/submission-status/:courseId", isAuth, getSubmissionStatus);
 
 export default courseRouter;

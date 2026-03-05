@@ -18,6 +18,7 @@ import getPublishedCourse from "./customHooks/getPublishedCourse";
 import AllCourses from "./pages/AllCourses";
 import CreateLecture from "./pages/Educator/CreateLecture";
 import EditLecture from "./pages/Educator/EditLecture";
+import CreateAssignment from "./pages/Educator/CreateAssignment";
 import ViewCourse from "./pages/ViewCourse";
 import ScrollToTop from "./component/ScrollToTop";
 import ViewLectures from "./pages/ViewLectures";
@@ -107,6 +108,16 @@ function App() {
           element={
             userData?.role === "educator" ? (
               <CreateLecture />
+            ) : (
+              <Navigate to={"/signup"} />
+            )
+          }
+        />
+        <Route
+          path="/create-assignment/:courseId"
+          element={
+            userData?.role === "educator" ? (
+              <CreateAssignment />
             ) : (
               <Navigate to={"/signup"} />
             )

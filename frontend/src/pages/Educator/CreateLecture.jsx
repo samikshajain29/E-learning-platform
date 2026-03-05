@@ -14,6 +14,7 @@ function CreateLecture() {
   const navigate = useNavigate();
   const [lectureTitle, setLectureTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [courseStatus, setCourseStatus] = useState("ongoing");
   const dispatch = useDispatch();
   const { lectureData } = useSelector((state) => state.lecture);
 
@@ -45,6 +46,8 @@ function CreateLecture() {
         );
         console.log(result.data);
         dispatch(setLectureData(result.data.lectures));
+        // Get course status
+        setCourseStatus(result.data.status || "ongoing");
       } catch (error) {
         console.log(error);
       }
@@ -91,6 +94,15 @@ function CreateLecture() {
               "+ Create Lecture"
             )}
           </button>
+          {/* Create Assignment Button - Only visible if course status is completed */}
+          {courseStatus === "completed" && (
+            <button
+              className="px-5 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition-all text-sm font-medium shadow"
+              onClick={() => navigate(`/create-assignment/${courseId}`)}
+            >
+              + Create Assignment
+            </button>
+          )}
         </div>
         {/* lecture list */}
         <div className="space-y-2">

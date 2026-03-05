@@ -3,7 +3,8 @@ import isAuth from "../middlewares/isAuth.js";
 import {
     updateLectureProgress,
     getEducatorProgressStats,
-    getLectureProgress
+    getLectureProgress,
+    getCourseCompletionStatus
 } from "../controllers/progressController.js";
 
 const progressRouter = express.Router();
@@ -19,5 +20,8 @@ progressRouter.get("/educator/:courseId", getEducatorProgressStats);
 
 // Get specific lecture progress (optional)
 progressRouter.get("/lecture", getLectureProgress);
+
+// Get course completion status for student
+progressRouter.get("/course/:courseId", getCourseCompletionStatus);
 
 export default progressRouter;
