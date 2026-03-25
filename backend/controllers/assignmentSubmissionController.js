@@ -65,9 +65,9 @@ export const submitAssignment = async (req, res) => {
             };
         });
 
-        // Each question = 10 marks, total = 100
+        // Each question = 10 marks
         const score = correctAnswers * 10;
-        const totalMarks = 100;
+        const totalMarks = assignment.questions.length * 10;
 
         // Create submission
         const submission = new AssignmentSubmission({

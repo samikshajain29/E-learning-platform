@@ -49,9 +49,9 @@ const assignmentSchema = new mongoose.Schema(
             required: true,
             validate: {
                 validator: function (v) {
-                    return v.length === 10;
+                    return v.length > 0;
                 },
-                message: "Assignment must have exactly 10 questions",
+                message: "Assignment must have at least 1 question",
             },
         },
     },

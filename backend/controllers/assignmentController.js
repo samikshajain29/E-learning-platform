@@ -13,9 +13,9 @@ export const uploadAssignment = async (req, res) => {
             return res.status(400).json({ message: "Questions array is required" });
         }
 
-        // Validate exactly 10 questions
-        if (questions.length !== 10) {
-            return res.status(400).json({ message: "Assignment must contain exactly 10 questions" });
+        // Validate at least 1 question
+        if (questions.length === 0) {
+            return res.status(400).json({ message: "Assignment must contain at least 1 question" });
         }
 
         // Validate each question has exactly 4 options and a correct answer
