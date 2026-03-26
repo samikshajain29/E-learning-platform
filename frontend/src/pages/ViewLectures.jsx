@@ -375,7 +375,7 @@ function ViewLectures() {
                     </button>
                   )}
 
-                  {!certificateEligible && submissionScore?.score < 40 && (
+                  {!certificateEligible && submissionScore?.percentage < 40 && (
                     <p className="text-xs text-red-600 mt-2 text-center font-medium">
                       ⚠️ Score must be at least 40% to download certificate
                     </p>

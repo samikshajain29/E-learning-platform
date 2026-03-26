@@ -69,7 +69,7 @@ function Dashboard() {
           studentId: student.userId,
           studentName: student.studentName,
           studentEmail: student.email,
-          enrolledAt: null, // Not available in new API
+          enrolledAt: student.enrolledAt || null, // Fetched from new API
           completedLectures: student.completedLectures,
           totalLectures: student.totalLectures,
           completionPercentage: student.percentage
@@ -115,8 +115,8 @@ function Dashboard() {
     const rows = courseData.students.map((student) => [
       student.name || "N/A",
       student.email || "N/A",
-      student.createdAt
-        ? new Date(student.createdAt).toLocaleDateString()
+      student.enrolledAt
+        ? new Date(student.enrolledAt).toLocaleDateString()
         : "N/A",
     ]);
 

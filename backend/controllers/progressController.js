@@ -145,7 +145,7 @@ export const getEducatorProgressStats = async (req, res) => {
         const students = await User.find({
             enrolledCourses: courseId,
             _id: { $ne: educatorId }
-        }).select("name email createdAt");
+        }).select("name email createdAt enrollmentDates");
 
         // Get progress data for all students
         const studentStats = await Promise.all(
@@ -161,10 +161,14 @@ export const getEducatorProgressStats = async (req, res) => {
                     ? Math.round((completedLectures / totalLectures) * 100)
                     : 0;
 
+                const enrollment = student.enrollmentDates?.find(e => e.course?.toString() === courseId);
+                const enrolledAt = enrollment ? enrollment.enrolledAt : null;
+
                 return {
                     userId: student._id,
                     studentName: student.name,
                     email: student.email,
+                    enrolledAt: enrolledAt,
                     completedLectures: completedLectures,
                     totalLectures: totalLectures,
                     percentage: percentage

@@ -11,14 +11,29 @@ function CreateAssignment() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
-    // Initialize 10 questions with empty fields
-    const [questions, setQuestions] = useState(
-        Array(10).fill(null).map((_, index) => ({
+    // Initialize with 1 question containing empty fields
+    const [questions, setQuestions] = useState([
+        {
             question: "",
             options: ["", "", "", ""],
             correctAnswer: "",
-        }))
-    );
+        }
+    ]);
+
+    const addQuestion = () => {
+        setQuestions([
+            ...questions,
+            { question: "", options: ["", "", "", ""], correctAnswer: "" }
+        ]);
+    };
+
+    const removeQuestion = (indexToRemove) => {
+        if (questions.length === 1) {
+            toast.error("Assignment must have at least one question");
+            return;
+        }
+        setQuestions(questions.filter((_, index) => index !== indexToRemove));
+    };
 
     const handleQuestionChange = (index, field, value) => {
         const updatedQuestions = [...questions];
@@ -89,7 +104,7 @@ function CreateAssignment() {
                 {/* Instructions */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                     <p className="text-sm text-blue-800">
-                        <strong>Instructions:</strong> Create an assignment with exactly 10 MCQ questions.
+                        <strong>Instructions:</strong> Create an assignment with at least 1 MCQ question.
                         Each question must have 4 options. This assignment will be visible to all students
                         enrolled in the course.
                     </p>
@@ -99,9 +114,19 @@ function CreateAssignment() {
                 <div className="space-y-6">
                     {questions.map((q, qIndex) => (
                         <div key={qIndex} className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                                Question {qIndex + 1}
-                            </h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-800">
+                                    Question {qIndex + 1}
+                                </h3>
+                                {questions.length > 1 && (
+                                    <button
+                                        onClick={() => removeQuestion(qIndex)}
+                                        className="text-red-500 hover:text-red-700 text-sm font-medium"
+                                    >
+                                        Remove Question
+                                    </button>
+                                )}
+                            </div>
 
                             {/* Question Input */}
                             <div className="mb-4">
@@ -157,6 +182,16 @@ function CreateAssignment() {
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Add Question Button */}
+                <div className="mt-6 flex justify-center">
+                    <button
+                        onClick={addQuestion}
+                        className="px-6 py-3 rounded-md border-2 border-dashed border-blue-400 text-blue-600 hover:bg-blue-50 transition font-medium w-full max-w-md"
+                    >
+                        + Add More Questions
+                    </button>
                 </div>
 
                 {/* Submit Button */}

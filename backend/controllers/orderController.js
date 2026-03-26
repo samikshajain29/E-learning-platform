@@ -50,6 +50,8 @@ export const verifyPayment = async (req, res) => {
       // Update user enrollment
       if (!user.enrolledCourses.includes(courseId)) {
         user.enrolledCourses.push(courseId);
+        if (!user.enrollmentDates) user.enrollmentDates = [];
+        user.enrollmentDates.push({ course: courseId, enrolledAt: new Date() });
 
         // Update user's enrollment information if provided
         if (enrollmentData) {

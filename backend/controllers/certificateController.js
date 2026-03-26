@@ -48,10 +48,11 @@ export const generateCertificate = async (req, res) => {
             });
         }
 
-        // Check if score >= 40
-        if (assignment.score < 40) {
+        // Check if percentage >= 40%
+        const percentage = (assignment.score / assignment.totalMarks) * 100;
+        if (percentage < 40) {
             return res.status(400).json({
-                message: "Certificate is only available for scores >= 40%. Your current score: " + assignment.score
+                message: "Certificate is only available for scores >= 40%. Your current percentage: " + percentage.toFixed(2) + "%"
             });
         }
 
@@ -299,7 +300,7 @@ export const checkCertificateEligibility = async (req, res) => {
             });
         }
 
-        const isEligible = submission.score >= 40;
+        const isEligible = (submission.score / submission.totalMarks) * 100 >= 40;
 
         // Check if certificate already exists
         const existingCertificate = await Certificate.findOne({

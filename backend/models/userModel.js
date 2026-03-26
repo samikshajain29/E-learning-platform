@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema(
         ref: "Course",
       },
     ],
+    enrollmentDates: [
+      {
+        course: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+        enrolledAt: { type: Date, default: Date.now }
+      }
+    ],
     courseProgress: [
       {
         courseId: {

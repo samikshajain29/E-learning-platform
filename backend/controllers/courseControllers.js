@@ -249,7 +249,7 @@ export const getDashboardStats = async (req, res) => {
     const courses = await Course.find({ creator: educatorId })
       .populate({
         path: "enrolledStudents",
-        select: "name email createdAt role",
+        select: "name email createdAt role enrollmentDates",
       })
       .populate("lectures")
       .lean();
@@ -279,6 +279,17 @@ export const getDashboardStats = async (req, res) => {
         }
       });
 
+      const studentsWithEnrollments = enrolledStudentsAsStudents.map(student => {
+        const enrollment = student.enrollmentDates?.find(e => e.course?.toString() === course._id.toString());
+        return {
+          _id: student._id,
+          name: student.name,
+          email: student.email,
+          enrolledAt: enrollment ? enrollment.enrolledAt : null,
+          createdAt: student.createdAt
+        };
+      });
+
       return {
         courseId: course._id,
         courseName: course.title,
@@ -288,7 +299,7 @@ export const getDashboardStats = async (req, res) => {
         enrolledCount: enrolledCount,
         revenue: revenue,
         isPublished: course.isPublished,
-        students: enrolledStudentsAsStudents, // Include all enrolled users except creator
+        students: studentsWithEnrollments, // Include all enrolled users except creator
         createdAt: course.createdAt,
       };
     });
@@ -328,7 +339,7 @@ export const getStudentProgress = async (req, res) => {
       enrolledCourses: courseId,
       _id: { $ne: course.creator }, // Exclude the course creator from student list
     })
-      .select("name email courseProgress createdAt role")
+      .select("name email courseProgress createdAt role enrollmentDates")
       .lean();
 
     // Calculate progress for each student
@@ -343,11 +354,14 @@ export const getStudentProgress = async (req, res) => {
         ? Math.round((completedCount / totalLectures) * 100)
         : 0;
 
+      const enrollment = student.enrollmentDates?.find(e => e.course?.toString() === courseId);
+      const enrolledAt = enrollment ? enrollment.enrolledAt : null;
+
       return {
         studentId: student._id,
         studentName: student.name,
         studentEmail: student.email,
-        enrolledAt: student.createdAt,
+        enrolledAt: enrolledAt,
         completedLectures: completedCount,
         totalLectures: totalLectures,
         completionPercentage: completionPercentage,
