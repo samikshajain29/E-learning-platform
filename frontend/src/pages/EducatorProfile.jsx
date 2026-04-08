@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Nav from "../component/Nav";
 import Card from "../component/Card";
+import { FaArrowLeftLong } from "react-icons/fa6";
 import { serverUrl } from "../App";
 
 function EducatorProfile() {
+  const navigate = useNavigate()
   const { educatorId } = useParams();
   const [educator, setEducator] = useState(null);
   const [courses, setCourses] = useState([]);
@@ -76,6 +78,10 @@ function EducatorProfile() {
         {/* Educator Profile Header */}
         <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6 mb-8">
           <div className="flex flex-col md:flex-row items-center gap-6">
+          <FaArrowLeftLong
+          className="text-black w-[22px] h-[22px] cursor-pointer"
+          onClick={() => navigate(-1)}
+          />
             <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
               <div className="text-4xl font-bold text-gray-600">
                 {educator.name?.charAt(0)?.toUpperCase()}
