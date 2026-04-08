@@ -29,6 +29,12 @@ function Dashboard() {
   const [loadingProgress, setLoadingProgress] = useState(false);
   const [progressStats, setProgressStats] = useState([]); // New state for API data
 
+  // Student Details Modal State
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [studentDetailsModalOpen, setStudentDetailsModalOpen] = useState(false);
+  const [studentDetailsData, setStudentDetailsData] = useState(null);
+  const [studentDetailsLoading, setStudentDetailsLoading] = useState(false);
+
   // Fetch dashboard statistics
   useEffect(() => {
     const fetchDashboardStats = async () => {
@@ -103,6 +109,25 @@ function Dashboard() {
     setSelectedCourse(course);
     setShowStudentList(true);
     fetchStudentProgress(course.courseId);
+  };
+
+  // Handle student click to fetch details
+  const handleStudentClick = async (studentId) => {
+    if (!studentId) return;
+    setSelectedStudentId(studentId);
+    setStudentDetailsModalOpen(true);
+    setStudentDetailsLoading(true);
+    try {
+      const response = await axios.get(`${serverUrl}/api/students/${studentId}/details`, {
+        withCredentials: true,
+      });
+      setStudentDetailsData(response.data);
+    } catch (error) {
+      console.error("Error fetching student details:", error);
+      toast.error("Failed to load student details");
+    } finally {
+      setStudentDetailsLoading(false);
+    }
   };
 
   // Generate CSV content
@@ -553,7 +578,11 @@ function Dashboard() {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {studentProgress.map((student, index) => (
-                          <tr key={student.studentId || index} className="hover:bg-gray-50">
+                          <tr 
+                            key={student.studentId || index} 
+                            className="hover:bg-gray-50 cursor-pointer"
+                            onClick={() => handleStudentClick(student.studentId)}
+                          >
                             <td className="px-6 py-4 text-sm text-gray-500">{index + 1}</td>
                             <td className="px-6 py-4 text-sm font-medium text-gray-900">
                               {student.studentName || "N/A"}
@@ -591,6 +620,117 @@ function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Student Details Modal */}
+      {studentDetailsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-fade-in-up">
+            <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+              <h2 className="text-xl font-bold text-gray-800">Student Details</h2>
+              <button
+                className="text-gray-500 hover:text-red-500 transition-colors text-xl font-bold"
+                onClick={() => setStudentDetailsModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 flex-1 overflow-y-auto">
+              {studentDetailsLoading ? (
+                <div className="flex justify-center items-center py-20">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-black"></div>
+                </div>
+              ) : studentDetailsData ? (
+                <div className="space-y-6">
+                  {/* Student Info */}
+                  <div className="bg-white border rounded-lg p-6 flex flex-col md:flex-row items-center gap-6 shadow-sm">
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${studentDetailsData.name}&background=111827&color=fff&size=128`}
+                      alt={studentDetailsData.name}
+                      className="w-24 h-24 rounded-full border-4 border-gray-100 shadow-md"
+                    />
+                    <div className="text-center md:text-left space-y-1">
+                      <h3 className="text-2xl font-bold text-gray-900">{studentDetailsData.name}</h3>
+                      <p className="text-gray-500 flex items-center justify-center md:justify-start gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        {studentDetailsData.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Enrolled Courses */}
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                      Enrolled Courses
+                    </h4>
+                    {studentDetailsData.enrolledCourses && studentDetailsData.enrolledCourses.length > 0 ? (
+                      <div className="overflow-x-auto border rounded-xl shadow-sm">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Course Name</th>
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Enrollment Date</th>
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Assignment</th>
+                              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Score</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {studentDetailsData.enrolledCourses.map((course) => (
+                              <tr key={course.courseId} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4">
+                                  <div className="text-sm font-medium text-gray-900">{course.courseName}</div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="text-sm text-gray-500 flex items-center gap-1.5">
+                                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    {course.enrolledAt ? new Date(course.enrolledAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : "N/A"}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                                      course.assignmentCompleted
+                                        ? "bg-green-100 text-green-800 border border-green-200"
+                                        : "bg-red-100 text-red-800 border border-red-200"
+                                    }`}
+                                  >
+                                    {course.assignmentCompleted ? (
+                                      <><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path></svg> Completed</>
+                                    ) : (
+                                      <><svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg> Not Completed</>
+                                    )}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {course.assignmentCompleted && course.score !== null ? (
+                                    <div className="flex items-baseline gap-1">
+                                      <span className="text-sm font-bold text-gray-900">{course.score}</span>
+                                      {course.totalMarks && <span className="text-xs text-gray-500">/ {course.totalMarks}</span>}
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-gray-400 font-medium">N/A</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <p className="text-gray-500 text-sm">Student is not enrolled in any courses yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-10 text-red-500 bg-red-50 rounded-lg">Failed to load student details.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
