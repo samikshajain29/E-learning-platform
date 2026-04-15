@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../assets/logo.jpg";
 import google from "../assets/google.jpg";
 import { IoEyeOutline } from "react-icons/io5";
@@ -24,6 +24,16 @@ function Signup() {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
 
+  useEffect(() => {
+    if (userData) {
+      if (userData.role === "educator") {
+        navigate("/apply-educator");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [userData, navigate]);
+
   const handleSignup = async () => {
     setLoading(true);
     try {
@@ -34,7 +44,6 @@ function Signup() {
       );
       dispatch(setUserData(result.data));
       setLoading(false);
-      navigate("/");
       toast.success("Signup Successfully");
     } catch (error) {
       console.log(error);
@@ -54,7 +63,6 @@ function Signup() {
         { withCredentials: true }
       );
       dispatch(setUserData(result.data));
-      navigate("/");
       toast.success("Signup Successfully");
     } catch (error) {
       console.log(error);
@@ -128,13 +136,13 @@ function Signup() {
             )}
           </div>
 
-          <button
+          {/* <button
             type="button"
             className="mt-1 text-[14px] font-medium text-[#6f6f6f] hover:text-black underline underline-offset-2 transition-colors"
             onClick={() => navigate(userData ? "/apply-educator" : "/login?redirect=/apply-educator")}
           >
             Request for Educator
-          </button>
+          </button> */}
           <div className="flex md:w-[50%] w-[70%] items-center justify-between">
             <span
               className={`px-[10px] py-[5px] border-[2px] border-[#e7e6e6] rounded-xl cursor-pointer hover:border-black ${role === "student" ? "border-[black]" : "border-[#646464]"

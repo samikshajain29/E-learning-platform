@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../assets/logo.jpg";
 import google from "../assets/google.jpg";
 import { IoEyeOutline } from "react-icons/io5";
@@ -9,7 +9,7 @@ import { serverUrl } from "../App";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../utils/firebase";
@@ -24,6 +24,19 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const { userData } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    if (userData) {
+      if (redirectPath && redirectPath !== "/") {
+        navigate(redirectPath);
+      } else if (userData.role === "educator") {
+        navigate("/apply-educator");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [userData, navigate, redirectPath]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -35,7 +48,6 @@ function Login() {
       );
       dispatch(setUserData(result.data));
       setLoading(false);
-      navigate(redirectPath);
       toast.success("Login Successfully");
     } catch (error) {
       console.log(error);
@@ -56,7 +68,6 @@ function Login() {
         { withCredentials: true }
       );
       dispatch(setUserData(result.data));
-      navigate(redirectPath);
       toast.success("Login Successfully");
     } catch (error) {
       console.log(error);

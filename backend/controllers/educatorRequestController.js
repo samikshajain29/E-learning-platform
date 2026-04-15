@@ -80,3 +80,19 @@ export const applyEducator = async (req, res) => {
     res.status(500).json({ message: "Server error occurred while submitting." });
   }
 };
+
+// @desc    Get status of an educator request
+// @route   GET /api/educator/status
+// @access  Private
+export const getEducatorStatus = async (req, res) => {
+  try {
+    const existingRequest = await EducatorRequest.findOne({ userId: req.userId });
+    if (existingRequest) {
+      return res.status(200).json({ status: existingRequest.status });
+    }
+    return res.status(200).json({ status: "none" });
+  } catch (error) {
+    console.error("Get Educator Status Error:", error);
+    res.status(500).json({ message: "Server error occurred while checking status." });
+  }
+};

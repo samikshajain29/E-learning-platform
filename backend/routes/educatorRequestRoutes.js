@@ -1,5 +1,5 @@
 import express from "express";
-import { applyEducator } from "../controllers/educatorRequestController.js";
+import { applyEducator, getEducatorStatus } from "../controllers/educatorRequestController.js";
 import { isAuth } from "../middlewares/isAuth.js";
 import upload from "../middlewares/multer.js";
 
@@ -15,5 +15,7 @@ router.post(
   ]),
   applyEducator
 );
+
+router.get("/status", isAuth, getEducatorStatus);
 
 export default router;

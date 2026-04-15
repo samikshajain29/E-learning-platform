@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -27,6 +27,21 @@ function ApplyEducator() {
   const [resume, setResume] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [appStatus, setAppStatus] = useState("loading");
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await axios.get(`${serverUrl}/api/educator/status`, {
+          withCredentials: true,
+        });
+        setAppStatus(res.data.status);
+      } catch (error) {
+        setAppStatus("error");
+      }
+    };
+    fetchStatus();
+  }, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -83,7 +98,7 @@ function ApplyEducator() {
       });
       toast.success(res.data.message || "Your educator application has been submitted successfully and is under review.");
       setLoading(false);
-      navigate("/"); // Redirect to home or dashboard after success
+      setAppStatus("pending");
     } catch (error) {
       setLoading(false);
       const msg = error.response?.data?.message || "Failed to submit request.";
@@ -91,6 +106,42 @@ function ApplyEducator() {
       console.log(error);
     }
   };
+
+  if (appStatus === "loading") {
+    return (
+      <div className="min-h-screen bg-[#f9f9f9] flex justify-center items-center">
+        <ClipLoader size={50} color="black" />
+      </div>
+    );
+  }
+
+  if (appStatus !== "none" && appStatus !== "error") {
+    return (
+      <div className="min-h-screen bg-[#f9f9f9] flex justify-center py-20 px-4 mt-[60px]">
+        <div className="bg-white max-w-[600px] w-full p-10 shadow-xl rounded-2xl flex flex-col items-center gap-4 text-center">
+          <FaArrowLeftLong
+            className="absolute top-[16%] left-[5%] w-[22px] h-[22px] cursor-pointer"
+            onClick={() => navigate("/")}
+          />
+          <h1 className="text-3xl font-bold text-black mb-2">Application Status</h1>
+          <div className={`text-xl font-semibold capitalize ${appStatus === "pending" ? "text-yellow-600" : appStatus === "approved" ? "text-green-600" : "text-red-600"}`}>
+            Status: {appStatus}
+          </div>
+          <p className="text-gray-500">
+            {appStatus === "pending" ? "Your application is currently under review by our administration team. We'll update you soon."
+              : appStatus === "approved" ? "Your application has been approved! You can now access your educator dashboard."
+                : "Your application was unfortunately rejected at this time."}
+          </p>
+          <button
+            onClick={() => navigate("/")}
+            className="mt-6 px-6 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition"
+          >
+            Go back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] flex justify-center py-10 px-4 mt-[60px]">
