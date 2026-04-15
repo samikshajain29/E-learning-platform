@@ -3,43 +3,108 @@ import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 dotenv.config();
 
+// export const searchWithAi = async (req, res) => {
+//   try {
+//     const { input } = req.body;
+//     if (!input) {
+//       return res.status(400).json({ message: "Search query is required" });
+//     }
+
+//     const ai = new GoogleGenAI({
+//       apiKey: process.env.GEMINI_API_KEY,
+//     });
+
+//     const prompt = `You are an intelligent assistant for an LMS platform. A user will type any query about what they want to learn. Your task is to understand the intent and return one ** most relevant keyword** from the following list of course categories and levels:
+
+//     - App Development
+//     - AI/ML
+//     - AI Tools
+//     - Data Science
+//     - Data Analytics
+//     - Ethical Hacking
+//     - UI/UX Designing
+//     - Web Development
+//     - Others
+//     - Beginner
+//     - Intermediate
+//     - Advanced
+
+//    Only reply with one single keyword from the list above that best matches the query. Do not explain anything. No extra text.
+
+//    Query: ${input} 
+//     `;
+//     const response = await ai.models.generateContent({
+//       model: "gemini-2.5-flash",
+//       contents: prompt,
+//     });
+
+//     const keyword = response.text;
+//     const courses = await Course.find({
+//       isPublished: true,
+//       $or: [
+//         { title: { $regex: input, $options: "i" } },
+//         { subTitle: { $regex: input, $options: "i" } },
+//         { description: { $regex: input, $options: "i" } },
+//         { category: { $regex: input, $options: "i" } },
+//         { level: { $regex: input, $options: "i" } },
+//       ],
+//     });
+//     if (courses.length > 0) {
+//       return res.status(200).json(courses);
+//     } else {
+//       const courses = await Course.find({
+//         isPublished: true,
+//         $or: [
+//           { title: { $regex: keyword, $options: "i" } },
+//           { subTitle: { $regex: keyword, $options: "i" } },
+//           { description: { $regex: keyword, $options: "i" } },
+//           { category: { $regex: keyword, $options: "i" } },
+//           { level: { $regex: keyword, $options: "i" } },
+//         ],
+//       });
+//       return res.status(200).json(courses);
+//     }
+//   } catch (error) {
+//     return res.status(500).json({ message: `Failed to search ${error}` });
+//   }
+// };
+
 export const searchWithAi = async (req, res) => {
   try {
     const { input } = req.body;
+
     if (!input) {
       return res.status(400).json({ message: "Search query is required" });
     }
 
-    const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    });
+    let keyword = input; // fallback
 
-    const prompt = `You are an intelligent assistant for an LMS platform. A user will type any query about what they want to learn. Your task is to understand the intent and return one ** most relevant keyword** from the following list of course categories and levels:
-    
-    - App Development
-    - AI/ML
-    - AI Tools
-    - Data Science
-    - Data Analytics
-    - Ethical Hacking
-    - UI/UX Designing
-    - Web Development
-    - Others
-    - Beginner
-    - Intermediate
-    - Advanced
-    
-   Only reply with one single keyword from the list above that best matches the query. Do not explain anything. No extra text.
+    try {
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+      });
 
-   Query: ${input} 
-    `;
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
+      const prompt = `Return ONLY one keyword from:
+App Development, AI/ML, AI Tools, Data Science, Data Analytics, Ethical Hacking, UI/UX Designing, Web Development, Others, Beginner, Intermediate, Advanced.
 
-    const keyword = response.text;
-    const courses = await Course.find({
+Query: ${input}`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+      });
+
+      // ✅ SAFE extraction
+      keyword =
+        response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || input;
+
+    } catch (aiError) {
+      console.log("AI Error:", aiError.message);
+      // ❗ agar AI fail ho jaye to bhi search chalna chahiye
+    }
+
+    // 🔍 First search (user input)
+    let courses = await Course.find({
       isPublished: true,
       $or: [
         { title: { $regex: input, $options: "i" } },
@@ -49,10 +114,10 @@ export const searchWithAi = async (req, res) => {
         { level: { $regex: input, $options: "i" } },
       ],
     });
-    if (courses.length > 0) {
-      return res.status(200).json(courses);
-    } else {
-      const courses = await Course.find({
+
+    // 🔁 Fallback search (AI keyword)
+    if (courses.length === 0) {
+      courses = await Course.find({
         isPublished: true,
         $or: [
           { title: { $regex: keyword, $options: "i" } },
@@ -62,9 +127,15 @@ export const searchWithAi = async (req, res) => {
           { level: { $regex: keyword, $options: "i" } },
         ],
       });
-      return res.status(200).json(courses);
     }
+
+    return res.status(200).json(courses);
+
   } catch (error) {
-    return res.status(500).json({ message: `Failed to search ${error}` });
+    console.error("Search API Error:", error);
+    return res.status(500).json({
+      message: "Failed to search",
+      error: error.message,
+    });
   }
 };

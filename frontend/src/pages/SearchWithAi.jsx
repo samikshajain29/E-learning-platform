@@ -13,6 +13,8 @@ function SearchWithAi() {
   const [input, setInput] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [listening, setListening] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   function speak(message) {
     let utterance = new SpeechSynthesisUtterance(message);
@@ -40,7 +42,10 @@ function SearchWithAi() {
   };
 
   const handleRecommendations = async (query) => {
+    if (!query) return;
     try {
+      setIsLoading(true);
+      setError(null);
       const result = await axios.post(
         serverUrl + "/api/course/search",
         { input: query },
@@ -49,6 +54,7 @@ function SearchWithAi() {
       console.log(result.data);
       setRecommendations(result.data);
       setListening(false);
+      setIsLoading(false);
       if (result.data.length > 0) {
         speak("These are the top courses I found for you");
       } else {
@@ -57,6 +63,8 @@ function SearchWithAi() {
     } catch (error) {
       console.log(error);
       setListening(false);
+      setIsLoading(false);
+      setError("Failed to fetch courses");
     }
   };
   return (
@@ -98,7 +106,15 @@ function SearchWithAi() {
         </div>
       </div>
 
-      {recommendations.length > 0 ? (
+      {isLoading ? (
+        <div className="mt-12 w-full flex justify-center items-center">
+          <div className="w-10 h-10 border-4 border-t-[#CB99C7] border-gray-700 rounded-full animate-spin"></div>
+        </div>
+      ) : error ? (
+        <h1 className="text-center text-xl sm:text-2xl mt-10 text-red-500">
+          {error}
+        </h1>
+      ) : recommendations.length > 0 ? (
         <div className="w-full max-w-6xl mt-12 px-2 sm:px-4">
           <h1 className="text-xl sm:text-2xl font-semibold mb-6 text-white text-center">
             AI Search Results
