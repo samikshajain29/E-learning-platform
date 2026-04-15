@@ -14,6 +14,7 @@ import progressRouter from "./routes/progressRoutes.js";
 import lectureQuestionRouter from "./routes/lectureQuestionRoutes.js";
 import certificateRouter from "./routes/certificateRoutes.js";
 import studentRouter from "./routes/studentRoutes.js";
+import educatorRequestRoutes from "./routes/educatorRequestRoutes.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -37,6 +38,7 @@ app.use("/api/progress", progressRouter);
 app.use("/api/lecture-question", lectureQuestionRouter);
 app.use("/api/certificate", certificateRouter);
 app.use("/api/students", studentRouter);
+app.use("/api/educator", educatorRequestRoutes);
 
 connectDB();
 

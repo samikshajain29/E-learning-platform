@@ -3,7 +3,7 @@ import logo from "../assets/logo.jpg";
 import google from "../assets/google.jpg";
 import { IoEyeOutline } from "react-icons/io5";
 import { IoEye } from "react-icons/io5";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { serverUrl } from "../App";
 import { FaArrowLeftLong } from "react-icons/fa6";
@@ -17,6 +17,9 @@ import { auth, provider } from "../../utils/firebase";
 function Login() {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const redirectPath = searchParams.get("redirect") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,7 +35,7 @@ function Login() {
       );
       dispatch(setUserData(result.data));
       setLoading(false);
-      navigate("/");
+      navigate(redirectPath);
       toast.success("Login Successfully");
     } catch (error) {
       console.log(error);
@@ -53,7 +56,7 @@ function Login() {
         { withCredentials: true }
       );
       dispatch(setUserData(result.data));
-      navigate("/");
+      navigate(redirectPath);
       toast.success("Login Successfully");
     } catch (error) {
       console.log(error);

@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import axios from "axios";
 import { serverUrl } from "../App";
+import { FaArrowLeftLong } from "react-icons/fa6";
 
 function ApplyEducator() {
   const { userData } = useSelector((state) => state.user);
@@ -14,16 +15,17 @@ function ApplyEducator() {
     name: userData?.name || "",
     email: userData?.email || "",
     contact: "",
+    currentRole: "",
     qualification: "",
     experience: "",
     skills: "",
     subjects: "",
     bio: "",
-    reason: "",
-    portfolio: "",
   });
 
   const [idProof, setIdProof] = useState(null);
+  const [resume, setResume] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
@@ -31,31 +33,30 @@ function ApplyEducator() {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = (e, setFile, validTypes, maxMb) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error("File size should be less than 2MB");
+      if (file.size > maxMb * 1024 * 1024) {
+        toast.error(`File size should be less than ${maxMb}MB`);
         e.target.value = null; // Clear
-        setIdProof(null);
+        setFile(null);
         return;
       }
-      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
       if (!validTypes.includes(file.type)) {
-        toast.error("Please upload a valid JPG, PNG, or PDF file.");
+        toast.error("Please upload a valid file type.");
         e.target.value = null;
-        setIdProof(null);
+        setFile(null);
         return;
       }
-      setIdProof(file);
+      setFile(file);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check required fields manually if HTML validation is bypassed
-    if (!formData.contact || !formData.qualification || !formData.experience || !formData.skills || !formData.subjects || !formData.bio || !formData.reason) {
+    // Check required fields manually
+    if (!formData.contact || !formData.qualification || !formData.experience || !formData.skills || !formData.subjects || !formData.bio) {
       toast.error("Please fill all required fields.");
       return;
     }
@@ -69,16 +70,18 @@ function ApplyEducator() {
       data.append(key, formData[key]);
     });
     data.append("idProof", idProof);
+    if (resume) data.append("resume", resume);
+    if (profileImage) data.append("profileImage", profileImage);
 
     try {
       setLoading(true);
-      const res = await axios.post(`${serverUrl}/api/educator-request`, data, {
+      const res = await axios.post(`${serverUrl}/api/educator/apply`, data, {
         withCredentials: true,
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
-      toast.success(res.data.message || "Application submitted successfully.");
+      toast.success(res.data.message || "Your educator application has been submitted successfully and is under review.");
       setLoading(false);
       navigate("/"); // Redirect to home or dashboard after success
     } catch (error) {
@@ -91,6 +94,10 @@ function ApplyEducator() {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] flex justify-center py-10 px-4 mt-[60px]">
+      <FaArrowLeftLong
+        className="absolute top-[16%] left-[5%] w-[22px] h-[22px] cursor-pointer"
+        onClick={() => navigate("/login")}
+      />
       <div className="bg-white max-w-[800px] w-full p-8 shadow-xl rounded-2xl">
         <h1 className="text-3xl font-bold text-center mb-2">Request for Educator</h1>
         <p className="text-center text-gray-500 mb-8">Fill out the form below to apply as an educator.</p>
@@ -130,6 +137,18 @@ function ApplyEducator() {
                 value={formData.contact}
                 onChange={handleInputChange}
                 required
+              />
+            </div>
+            {/* Current Role */}
+            <div className="flex flex-col gap-1">
+              <label htmlFor="currentRole" className="font-semibold text-sm">Current Role / Profession (Optional)</label>
+              <input
+                type="text"
+                id="currentRole"
+                className="border p-2 rounded-md focus:border-black outline-none"
+                placeholder="Ex. Software Engineer"
+                value={formData.currentRole}
+                onChange={handleInputChange}
               />
             </div>
             {/* Qualification */}
@@ -172,33 +191,19 @@ function ApplyEducator() {
                 required
               />
             </div>
-          </div>
-
-          {/* Skills */}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="skills" className="font-semibold text-sm">Skills (Comma separated) <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              id="skills"
-              className="border p-2 rounded-md focus:border-black outline-none"
-              placeholder="Ex. React, Node.js, Python"
-              value={formData.skills}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          {/* Portfolio */}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="portfolio" className="font-semibold text-sm">Portfolio/LinkedIn URL (Optional)</label>
-            <input
-              type="url"
-              id="portfolio"
-              className="border p-2 rounded-md focus:border-black outline-none"
-              placeholder="https://linkedin.com/in/username"
-              value={formData.portfolio}
-              onChange={handleInputChange}
-            />
+            {/* Skills */}
+            <div className="flex flex-col gap-1">
+              <label htmlFor="skills" className="font-semibold text-sm">Skills (Comma separated) <span className="text-red-500">*</span></label>
+              <input
+                type="text"
+                id="skills"
+                className="border p-2 rounded-md focus:border-black outline-none"
+                placeholder="Ex. React, Node.js, Python"
+                value={formData.skills}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
           </div>
 
           {/* Bio */}
@@ -215,30 +220,40 @@ function ApplyEducator() {
             ></textarea>
           </div>
 
-          {/* Reason */}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="reason" className="font-semibold text-sm">Why do you want to become an educator? <span className="text-red-500">*</span></label>
-            <textarea
-              id="reason"
-              rows={3}
-              className="border p-2 rounded-md focus:border-black outline-none resize-none"
-              placeholder="Explain your motivation..."
-              value={formData.reason}
-              onChange={handleInputChange}
-              required
-            ></textarea>
-          </div>
-
           {/* ID Proof */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="idProof" className="font-semibold text-sm">Valid ID Proof (PDF/JPG/PNG, Max: 2MB) <span className="text-red-500">*</span></label>
+            <label htmlFor="idProof" className="font-semibold text-sm">Valid ID Proof (PDF/JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
             <input
               type="file"
               id="idProof"
               accept=".jpg,.jpeg,.png,.pdf"
               className="border p-2 rounded-md focus:border-black outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 hover:file:bg-gray-200 cursor-pointer"
-              onChange={handleFileChange}
+              onChange={(e) => handleFileChange(e, setIdProof, ["image/jpeg", "image/png", "application/pdf"], 5)}
               required
+            />
+          </div>
+
+          {/* Resume */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="resume" className="font-semibold text-sm">Resume/CV (PDF/JPG/PNG, Max: 5MB) (Optional)</label>
+            <input
+              type="file"
+              id="resume"
+              accept=".jpg,.jpeg,.png,.pdf"
+              className="border p-2 rounded-md focus:border-black outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 hover:file:bg-gray-200 cursor-pointer"
+              onChange={(e) => handleFileChange(e, setResume, ["image/jpeg", "image/png", "application/pdf"], 5)}
+            />
+          </div>
+
+          {/* Profile Picture */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="profileImage" className="font-semibold text-sm">Profile Picture (JPG/PNG, Max: 5MB) (Optional)</label>
+            <input
+              type="file"
+              id="profileImage"
+              accept=".jpg,.jpeg,.png"
+              className="border p-2 rounded-md focus:border-black outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 hover:file:bg-gray-200 cursor-pointer"
+              onChange={(e) => handleFileChange(e, setProfileImage, ["image/jpeg", "image/png"], 5)}
             />
           </div>
 

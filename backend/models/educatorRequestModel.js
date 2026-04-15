@@ -20,6 +20,9 @@ const educatorRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    currentRole: {
+      type: String, // optional
+    },
     qualification: {
       type: String,
       required: true,
@@ -29,7 +32,7 @@ const educatorRequestSchema = new mongoose.Schema(
       required: true,
     },
     skills: {
-      type: String,
+      type: String, // comma separated
       required: true,
     },
     subjects: {
@@ -40,16 +43,15 @@ const educatorRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    reason: {
-      type: String,
-      required: true,
-    },
-    portfolio: {
-      type: String,
-    },
-    idProof: {
+    idProofUrl: {
       type: String, // URL from cloudinary
       required: true,
+    },
+    resumeUrl: {
+      type: String,
+    },
+    profileImageUrl: {
+      type: String,
     },
     status: {
       type: String,

@@ -8,7 +8,7 @@ import axios from "axios";
 import { serverUrl } from "../App";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUserData } from "../redux/userSlice";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../utils/firebase";
@@ -22,6 +22,7 @@ function Signup() {
   const [role, setRole] = useState("student");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const { userData } = useSelector((state) => state.user);
 
   const handleSignup = async () => {
     setLoading(true);
@@ -130,7 +131,7 @@ function Signup() {
           <button
             type="button"
             className="mt-1 text-[14px] font-medium text-[#6f6f6f] hover:text-black underline underline-offset-2 transition-colors"
-            onClick={() => navigate("/apply-educator")}
+            onClick={() => navigate(userData ? "/apply-educator" : "/login?redirect=/apply-educator")}
           >
             Request for Educator
           </button>

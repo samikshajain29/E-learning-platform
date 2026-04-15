@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import ApplyEducator from "./pages/ApplyEducator";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
@@ -159,6 +160,10 @@ function App() {
         <Route
           path="/wishlist"
           element={userData ? <WishlistPage /> : <Navigate to={"/signup"} />}
+        />
+        <Route
+          path="/apply-educator"
+          element={userData ? <ApplyEducator /> : <Navigate to={"/login?redirect=/apply-educator"} />}
         />
       </Routes>
     </>
