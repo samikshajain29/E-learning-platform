@@ -126,6 +126,14 @@ function Signup() {
               />
             )}
           </div>
+
+          <button
+            type="button"
+            className="mt-1 text-[14px] font-medium text-[#6f6f6f] hover:text-black underline underline-offset-2 transition-colors"
+            onClick={() => navigate("/apply-educator")}
+          >
+            Request for Educator
+          </button>
           <div className="flex md:w-[50%] w-[70%] items-center justify-between">
             <span
               className={`px-[10px] py-[5px] border-[2px] border-[#e7e6e6] rounded-xl cursor-pointer hover:border-black ${role === "student" ? "border-[black]" : "border-[#646464]"
@@ -173,6 +181,7 @@ function Signup() {
               Login
             </span>
           </div>
+
         </div>
         {/* right div */}
         <div className="w-[50%] h-[100%] rounded-r-2xl bg-[black] md:flex items-center justify-center flex-col hidden">
