@@ -77,8 +77,22 @@ function ApplyEducator() {
       toast.error("Please fill all required fields.");
       return;
     }
+
+    if (formData.contact.length < 10 || formData.contact.length > 15) {
+      toast.error("Contact number must be between 10 and 15 digits.");
+      return;
+    }
+
     if (!idProof) {
       toast.error("Please upload a valid ID proof.");
+      return;
+    }
+    if (!resume) {
+      toast.error("Please upload your Resume/CV.");
+      return;
+    }
+    if (!profileImage) {
+      toast.error("Please upload your Profile Picture.");
       return;
     }
 
@@ -87,8 +101,8 @@ function ApplyEducator() {
       data.append(key, formData[key]);
     });
     data.append("idProof", idProof);
-    if (resume) data.append("resume", resume);
-    if (profileImage) data.append("profileImage", profileImage);
+    data.append("resume", resume);
+    data.append("profileImage", profileImage);
 
     try {
       setLoading(true);
@@ -329,25 +343,27 @@ function ApplyEducator() {
 
           {/* Resume */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="resume" className="font-semibold text-sm">Resume/CV (PDF/JPG/PNG, Max: 5MB) (Optional)</label>
+            <label htmlFor="resume" className="font-semibold text-sm">Resume/CV (PDF/JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
             <input
               type="file"
               id="resume"
               accept=".jpg,.jpeg,.png,.pdf"
               className="border p-2 rounded-md focus:border-black outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 hover:file:bg-gray-200 cursor-pointer"
               onChange={(e) => handleFileChange(e, setResume, ["image/jpeg", "image/png", "application/pdf"], 5)}
+              required
             />
           </div>
 
           {/* Profile Picture */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="profileImage" className="font-semibold text-sm">Profile Picture (JPG/PNG, Max: 5MB) (Optional)</label>
+            <label htmlFor="profileImage" className="font-semibold text-sm">Profile Picture (JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
             <input
               type="file"
               id="profileImage"
               accept=".jpg,.jpeg,.png"
               className="border p-2 rounded-md focus:border-black outline-none file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 hover:file:bg-gray-200 cursor-pointer"
               onChange={(e) => handleFileChange(e, setProfileImage, ["image/jpeg", "image/png"], 5)}
+              required
             />
           </div>
 

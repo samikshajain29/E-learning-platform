@@ -12,7 +12,10 @@ export const applyEducator = async (req, res) => {
     // Check if a request already exists for this user
     const existingRequest = await EducatorRequest.findOne({ userId: req.userId });
 
-    if (existingRequest) {
+    // Check if contact already exists
+    const existingContact = await EducatorRequest.findOne({ contact });
+
+    if (existingRequest || existingContact) {
       // Clean up uploaded files if request rejected
       if (req.files) {
          Object.values(req.files).forEach((files) => {
@@ -23,11 +26,25 @@ export const applyEducator = async (req, res) => {
            });
          });
       }
-      return res.status(400).json({ message: `You already have a ${existingRequest.status} request submitted.` });
+      if (existingRequest) {
+        return res.status(400).json({ message: `You already have a ${existingRequest.status} request submitted.` });
+      }
+      if (existingContact) {
+        return res.status(400).json({ message: "This contact number is already in use" });
+      }
     }
 
-    if (!req.files || !req.files.idProof || req.files.idProof.length === 0) {
-      return res.status(400).json({ message: "ID Proof is required" });
+    if (!req.files || !req.files.idProof || req.files.idProof.length === 0 || !req.files.resume || req.files.resume.length === 0 || !req.files.profileImage || req.files.profileImage.length === 0) {
+      if (req.files) {
+         Object.values(req.files).forEach((files) => {
+           files.forEach((file) => {
+             import("fs").then(fs => {
+               if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+             }).catch(console.error);
+           });
+         });
+      }
+      return res.status(400).json({ message: "ID Proof, Resume, and Profile Picture are required" });
     }
 
     // Upload ID Proof to Cloudinary
@@ -36,14 +53,14 @@ export const applyEducator = async (req, res) => {
       return res.status(500).json({ message: "Failed to upload ID proof" });
     }
 
-    let resumeUrl = "";
-    if (req.files.resume && req.files.resume.length > 0) {
-        resumeUrl = await uploadOnCloudinary(req.files.resume[0].path);
+    const resumeUrl = await uploadOnCloudinary(req.files.resume[0].path);
+    if (!resumeUrl) {
+      return res.status(500).json({ message: "Failed to upload Resume" });
     }
 
-    let profileImageUrl = "";
-    if (req.files.profileImage && req.files.profileImage.length > 0) {
-        profileImageUrl = await uploadOnCloudinary(req.files.profileImage[0].path);
+    const profileImageUrl = await uploadOnCloudinary(req.files.profileImage[0].path);
+    if (!profileImageUrl) {
+      return res.status(500).json({ message: "Failed to upload Profile Picture" });
     }
 
     // Create the request

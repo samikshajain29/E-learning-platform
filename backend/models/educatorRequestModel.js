@@ -19,6 +19,7 @@ const educatorRequestSchema = new mongoose.Schema(
     contact: {
       type: String,
       required: true,
+      unique: true,
     },
     currentRole: {
       type: String, // optional
@@ -49,9 +50,11 @@ const educatorRequestSchema = new mongoose.Schema(
     },
     resumeUrl: {
       type: String,
+      required: true,
     },
     profileImageUrl: {
       type: String,
+      required: true,
     },
     status: {
       type: String,
