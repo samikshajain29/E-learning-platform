@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import axios from "axios";
 import { serverUrl } from "../App";
 import { FaArrowLeftLong } from "react-icons/fa6";
+import { setUserData } from "../redux/userSlice.js";
 
 function ApplyEducator() {
   const { userData } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [formData, setFormData] = useState({
     name: userData?.name || "",
@@ -115,14 +117,31 @@ function ApplyEducator() {
     );
   }
 
+  const handleLogout = async () => {
+    try {
+      const result = await axios.get(serverUrl + "/api/auth/logout", {
+        withCredentials: true,
+      });
+      dispatch(setUserData(null));
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      navigate("/login")
+      console.log(result.data);
+      toast.success("Logout Successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message);
+    }
+  };
+
   if (appStatus !== "none" && appStatus !== "error") {
     return (
       <div className="min-h-screen bg-[#f9f9f9] flex justify-center py-20 px-4 mt-[60px]">
         <div className="bg-white max-w-[600px] w-full p-10 shadow-xl rounded-2xl flex flex-col items-center gap-4 text-center">
-          <FaArrowLeftLong
+          {/* <FaArrowLeftLong
             className="absolute top-[16%] left-[5%] w-[22px] h-[22px] cursor-pointer"
             onClick={() => navigate("/")}
-          />
+          /> */}
           <h1 className="text-3xl font-bold text-black mb-2">Application Status</h1>
           <div className={`text-xl font-semibold capitalize ${appStatus === "pending" ? "text-yellow-600" : appStatus === "approved" ? "text-green-600" : "text-red-600"}`}>
             Status: {appStatus}
@@ -132,12 +151,19 @@ function ApplyEducator() {
               : appStatus === "approved" ? "Your application has been approved! You can now access your educator dashboard."
                 : "Your application was unfortunately rejected at this time."}
           </p>
-          <button
+          {/* <button
             onClick={() => navigate("/")}
             className="mt-6 px-6 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition"
           >
             Go back to Home
+          </button> */}
+          <button
+            onClick={handleLogout}
+            className="mt-6 px-6 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition"
+          >
+            Logout
           </button>
+
         </div>
       </div>
     );
@@ -145,10 +171,10 @@ function ApplyEducator() {
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] flex justify-center py-10 px-4 mt-[60px]">
-      <FaArrowLeftLong
+      {/* <FaArrowLeftLong
         className="absolute top-[16%] left-[5%] w-[22px] h-[22px] cursor-pointer"
         onClick={() => navigate("/login")}
-      />
+      /> */}
       <div className="bg-white max-w-[800px] w-full p-8 shadow-xl rounded-2xl">
         <h1 className="text-3xl font-bold text-center mb-2">Request for Educator</h1>
         <p className="text-center text-gray-500 mb-8">Fill out the form below to apply as an educator.</p>
