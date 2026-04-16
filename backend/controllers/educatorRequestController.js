@@ -1,4 +1,5 @@
 import EducatorRequest from "../models/educatorRequestModel.js";
+import User from "../models/userModel.js";
 import uploadOnCloudinary from "../config/cloudinary.js";
 
 // @desc    Submit an educator request
@@ -61,6 +62,8 @@ export const applyEducator = async (req, res) => {
       resumeUrl,
       profileImageUrl,
     });
+
+    await User.findByIdAndUpdate(req.userId, { hasAppliedForEducator: true });
 
     res.status(201).json({
       message: "Your educator application has been submitted successfully and is under review.",

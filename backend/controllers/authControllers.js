@@ -3,6 +3,7 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import genToken from "../config/token.js";
 import sendMail from "../config/sendMail.js";
+import Course from "../models/courseModel.js";
 
 export const signup = async (req, res) => {
   try {
@@ -48,6 +49,14 @@ export const login = async (req, res) => {
     let isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Incorrect password" });
+    }
+
+    if (user.role === "educator" && !user.hasAppliedForEducator) {
+      const hasCourses = await Course.exists({ creator: user._id });
+      if (hasCourses) {
+        user.hasAppliedForEducator = true;
+        await user.save();
+      }
     }
     let token = await genToken(user._id);
     res.cookie("token", token, {
@@ -128,13 +137,21 @@ export const resetPassword = async (req, res) => {
 export const googleAuth = async (req, res) => {
   try {
     const { name, email, role } = req.body;
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
     if (!user) {
       user = await User.create({
         name,
         email,
         role,
       });
+    }
+
+    if (user.role === "educator" && !user.hasAppliedForEducator) {
+      const hasCourses = await Course.exists({ creator: user._id });
+      if (hasCourses) {
+        user.hasAppliedForEducator = true;
+        await user.save();
+      }
     }
     let token = await genToken(user._id);
     res.cookie("token", token, {

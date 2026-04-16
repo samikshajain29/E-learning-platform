@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    hasAppliedForEducator: {
+      type: Boolean,
+      default: false,
+    },
     enrolledCourses: [
       {
         type: mongoose.Schema.Types.ObjectId,

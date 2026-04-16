@@ -67,8 +67,10 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            userData?.role === "educator" ? (
+            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
               <Dashboard />
+            ) : (
+              <Navigate to={"/apply-educator"} />
             ) : (
               <Navigate to={"/signup"} />
             )
@@ -77,8 +79,10 @@ function App() {
         <Route
           path="/courses"
           element={
-            userData?.role === "educator" ? (
+            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
               <Courses />
+            ) : (
+              <Navigate to={"/apply-educator"} />
             ) : (
               <Navigate to={"/signup"} />
             )
@@ -87,8 +91,10 @@ function App() {
         <Route
           path="/createcourse"
           element={
-            userData?.role === "educator" ? (
+            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
               <CreateCourses />
+            ) : (
+              <Navigate to={"/apply-educator"} />
             ) : (
               <Navigate to={"/signup"} />
             )
@@ -97,8 +103,10 @@ function App() {
         <Route
           path="/editcourse/:courseId"
           element={
-            userData?.role === "educator" ? (
+            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
               <EditCourse />
+            ) : (
+              <Navigate to={"/apply-educator"} />
             ) : (
               <Navigate to={"/signup"} />
             )
@@ -107,8 +115,10 @@ function App() {
         <Route
           path="/createlecture/:courseId"
           element={
-            userData?.role === "educator" ? (
+            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
               <CreateLecture />
+            ) : (
+              <Navigate to={"/apply-educator"} />
             ) : (
               <Navigate to={"/signup"} />
             )
@@ -117,8 +127,10 @@ function App() {
         <Route
           path="/create-assignment/:courseId"
           element={
-            userData?.role === "educator" ? (
+            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
               <CreateAssignment />
+            ) : (
+              <Navigate to={"/apply-educator"} />
             ) : (
               <Navigate to={"/signup"} />
             )
@@ -127,8 +139,10 @@ function App() {
         <Route
           path="/editlecture/:courseId/:lectureId"
           element={
-            userData?.role === "educator" ? (
+            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
               <EditLecture />
+            ) : (
+              <Navigate to={"/apply-educator"} />
             ) : (
               <Navigate to={"/signup"} />
             )

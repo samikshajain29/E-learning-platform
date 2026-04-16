@@ -169,6 +169,23 @@ function ApplyEducator() {
     );
   }
 
+  if (userData?.hasAppliedForEducator && appStatus === "none") {
+    return (
+      <div className="min-h-screen bg-[#f9f9f9] flex justify-center py-20 px-4 mt-[60px]">
+        <div className="bg-white max-w-[600px] w-full p-10 shadow-xl rounded-2xl flex flex-col items-center gap-4 text-center">
+          <h1 className="text-3xl font-bold text-black mb-2">Verified Educator</h1>
+          <p className="text-gray-500">You are already a verified educator on our platform.</p>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="mt-6 px-6 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f9f9f9] flex justify-center py-10 px-4 mt-[60px]">
       {/* <FaArrowLeftLong

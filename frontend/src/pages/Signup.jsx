@@ -27,7 +27,11 @@ function Signup() {
   useEffect(() => {
     if (userData) {
       if (userData.role === "educator") {
-        navigate("/apply-educator");
+        if (userData.hasAppliedForEducator) {
+          navigate("/dashboard");
+        } else {
+          navigate("/apply-educator");
+        }
       } else {
         navigate("/");
       }

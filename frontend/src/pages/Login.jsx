@@ -31,7 +31,11 @@ function Login() {
       if (redirectPath && redirectPath !== "/") {
         navigate(redirectPath);
       } else if (userData.role === "educator") {
-        navigate("/apply-educator");
+        if (userData.hasAppliedForEducator) {
+          navigate("/dashboard");
+        } else {
+          navigate("/apply-educator");
+        }
       } else {
         navigate("/");
       }
