@@ -15,6 +15,7 @@ import lectureQuestionRouter from "./routes/lectureQuestionRoutes.js";
 import certificateRouter from "./routes/certificateRoutes.js";
 import studentRouter from "./routes/studentRoutes.js";
 import educatorRequestRoutes from "./routes/educatorRequestRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -39,6 +40,7 @@ app.use("/api/lecture-question", lectureQuestionRouter);
 app.use("/api/certificate", certificateRouter);
 app.use("/api/students", studentRouter);
 app.use("/api/educator", educatorRequestRoutes);
+app.use("/api/admin", adminRouter);
 
 connectDB();
 
