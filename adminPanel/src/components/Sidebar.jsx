@@ -27,9 +27,12 @@ const Sidebar = () => {
           Dashboard
         </NavLink>
 
-        <button className="flex justify-center items-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-black hover:text-white rounded-lg transition-colors font-medium">
+        <NavLink
+          to="/admin/educator-requests"
+          className="flex justify-center items-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-black hover:text-white rounded-lg transition-colors font-medium"
+        >
           Educator Requests
-        </button>
+        </NavLink>
       </div>
 
 

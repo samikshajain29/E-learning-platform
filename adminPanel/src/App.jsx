@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import EducatorRequests from "./pages/EducatorRequests";
 
 const AdminLayout = ({ children }) => {
   return (
@@ -29,6 +30,7 @@ function App() {
               <AdminLayout>
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
+                  <Route path="/admin/educator-requests" element={<EducatorRequests />} />
                   {/* Add more protected routes here in future */}
                 </Routes>
               </AdminLayout>
