@@ -18,8 +18,22 @@ export const getCurrentUser = async (req, res) => {
         await user.save();
       }
     }
+    
+    let educatorStatus = "none";
+    if (user.hasAppliedForEducator) {
+      const EducatorRequest = (await import("../models/educatorRequestModel.js")).default;
+      const existingRequest = await EducatorRequest.findOne({ userId: req.userId });
+      if (existingRequest) {
+        educatorStatus = existingRequest.status;
+      } else if (user.role === "educator") {
+        educatorStatus = "approved"; // legacy edge-case 
+      }
+    }
 
-    return res.status(200).json(user);
+    const userObj = user.toObject();
+    userObj.educatorStatus = educatorStatus;
+
+    return res.status(200).json(userObj);
   } catch (error) {
     return res.status(500).json({ message: `getCurrentUser error ${error}` });
   }

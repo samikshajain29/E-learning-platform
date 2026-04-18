@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import Course from "../models/courseModel.js";
+import EducatorRequest from "../models/educatorRequestModel.js";
 
 // @desc    Admin login
 // @route   POST /api/admin/login
@@ -131,5 +132,80 @@ export const getAnalytics = async (req, res) => {
   } catch (error) {
     console.error("Error in getAnalytics:", error);
     return res.status(500).json({ message: "Server error fetching analytics" });
+  }
+};
+
+// @desc    Get pending educator requests
+// @route   GET /api/admin/educator-requests
+// @access  Private (Admin only)
+export const getPendingEducatorRequests = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filterStatus = status || "pending";
+    
+    const requests = await EducatorRequest.find({ status: filterStatus }).sort({ createdAt: -1 });
+    return res.status(200).json(requests);
+  } catch (error) {
+    console.error("Error fetching educator requests:", error);
+    return res.status(500).json({ message: "Server error fetching educator requests" });
+  }
+};
+
+// @desc    Get details of a specific educator request
+// @route   GET /api/admin/educator-request/:id
+// @access  Private (Admin only)
+export const getEducatorRequestDetails = async (req, res) => {
+  try {
+    const request = await EducatorRequest.findById(req.params.id);
+    if (!request) {
+      return res.status(404).json({ message: "Educator request not found" });
+    }
+    return res.status(200).json(request);
+  } catch (error) {
+    console.error("Error fetching educator request details:", error);
+    return res.status(500).json({ message: "Server error fetching request details" });
+  }
+};
+
+// @desc    Update educator request status (approve/reject)
+// @route   PATCH /api/admin/educator-request/:id
+// @access  Private (Admin only)
+export const updateEducatorRequestStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    
+    if (!["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const request = await EducatorRequest.findById(req.params.id);
+    if (!request) {
+      return res.status(404).json({ message: "Educator request not found" });
+    }
+
+    if (request.status !== "pending") {
+      return res.status(400).json({ message: `Request is already ${request.status}` });
+    }
+
+    const updatedRequest = await EducatorRequest.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    // If approved, update the user role to educator
+    if (status === "approved") {
+      await User.findByIdAndUpdate(request.userId, { 
+        role: "educator",
+      });
+    }
+
+    return res.status(200).json({ 
+      message: `Educator request ${status} successfully`, 
+      request: updatedRequest
+    });
+  } catch (error) {
+    console.error("Error updating educator request status:", error);
+    return res.status(500).json({ message: "Server error updating request status" });
   }
 };

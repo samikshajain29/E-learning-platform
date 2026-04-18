@@ -39,11 +39,30 @@ function ApplyEducator() {
         });
         setAppStatus(res.data.status);
       } catch (error) {
-        setAppStatus("error");
+        if (appStatus === "loading") {
+          setAppStatus("none"); // or keep as error depending on logic
+        }
       }
     };
+
     fetchStatus();
+
+    // Auto Data Fetching (Polling) to get real-time updates from Admin actions
+    const interval = setInterval(() => {
+      fetchStatus();
+    }, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval);
   }, []);
+
+  // Sync Redux user state with updated appStatus
+  useEffect(() => {
+    if (userData && appStatus !== "loading" && appStatus !== "error" && appStatus !== "none") {
+      if (userData.educatorStatus !== appStatus) {
+        dispatch(setUserData({ ...userData, educatorStatus: appStatus, hasAppliedForEducator: true }));
+      }
+    }
+  }, [appStatus, userData, dispatch]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -115,6 +134,9 @@ function ApplyEducator() {
       toast.success(res.data.message || "Your educator application has been submitted successfully and is under review.");
       setLoading(false);
       setAppStatus("pending");
+      if (userData) {
+        dispatch(setUserData({ ...userData, hasAppliedForEducator: true, educatorStatus: "pending" }));
+      }
     } catch (error) {
       setLoading(false);
       const msg = error.response?.data?.message || "Failed to submit request.";
@@ -171,12 +193,21 @@ function ApplyEducator() {
           >
             Go back to Home
           </button> */}
-          <button
-            onClick={handleLogout}
-            className="mt-6 px-6 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition"
-          >
-            Logout
-          </button>
+          {userData?.role === "educator" && appStatus === "approved" ? (
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="mt-6 px-6 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition"
+            >
+              Go to Dashboard
+            </button>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="mt-6 px-6 py-2 bg-black text-white rounded-md font-semibold hover:bg-gray-800 transition"
+            >
+              Logout
+            </button>
+          )}
 
         </div>
       </div>
@@ -330,7 +361,7 @@ function ApplyEducator() {
 
           {/* ID Proof */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="idProof" className="font-semibold text-sm">Valid ID Proof (PDF/JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
+            <label htmlFor="idProof" className="font-semibold text-sm">Valid ID Proof Only(JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
             <input
               type="file"
               id="idProof"
@@ -343,7 +374,7 @@ function ApplyEducator() {
 
           {/* Resume */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="resume" className="font-semibold text-sm">Resume/CV (PDF/JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
+            <label htmlFor="resume" className="font-semibold text-sm">Resume/CV Only(JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
             <input
               type="file"
               id="resume"
@@ -356,7 +387,7 @@ function ApplyEducator() {
 
           {/* Profile Picture */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="profileImage" className="font-semibold text-sm">Profile Picture (JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
+            <label htmlFor="profileImage" className="font-semibold text-sm">Profile Picture Only(JPG/PNG, Max: 5MB) <span className="text-red-500">*</span></label>
             <input
               type="file"
               id="profileImage"

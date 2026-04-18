@@ -33,7 +33,11 @@ export const signup = async (req, res) => {
       sameSite: "Strict",
       maxAge: 10 * 365 * 24 * 60 * 60 * 1000,
     });
-    return res.status(201).json(user);
+    
+    const userObj = user.toObject();
+    userObj.educatorStatus = "none";
+    
+    return res.status(201).json(userObj);
   } catch (error) {
     return res.status(500).json({ message: `Signup error ${error}` });
   }
@@ -58,6 +62,19 @@ export const login = async (req, res) => {
         await user.save();
       }
     }
+    let educatorStatus = "none";
+    if (user.hasAppliedForEducator) {
+      const EducatorRequest = (await import("../models/educatorRequestModel.js")).default;
+      const existingRequest = await EducatorRequest.findOne({ userId: user._id });
+      if (existingRequest) {
+        educatorStatus = existingRequest.status;
+      } else if (user.role === "educator") {
+        educatorStatus = "approved"; // legacy edge-case
+      }
+    }
+    const userObj = user.toObject();
+    userObj.educatorStatus = educatorStatus;
+
     let token = await genToken(user._id);
     res.cookie("token", token, {
       httpOnly: true,
@@ -65,7 +82,7 @@ export const login = async (req, res) => {
       sameSite: "Strict",
       maxAge: 10 * 365 * 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json(user);
+    return res.status(200).json(userObj);
   } catch (error) {
     return res.status(500).json({ message: `Login error ${error}` });
   }
@@ -153,6 +170,19 @@ export const googleAuth = async (req, res) => {
         await user.save();
       }
     }
+    let educatorStatus = "none";
+    if (user.hasAppliedForEducator) {
+      const EducatorRequest = (await import("../models/educatorRequestModel.js")).default;
+      const existingRequest = await EducatorRequest.findOne({ userId: user._id });
+      if (existingRequest) {
+        educatorStatus = existingRequest.status;
+      } else if (user.role === "educator") {
+        educatorStatus = "approved"; // legacy edge-case
+      }
+    }
+    const userObj = user.toObject();
+    userObj.educatorStatus = educatorStatus;
+
     let token = await genToken(user._id);
     res.cookie("token", token, {
       httpOnly: true,
@@ -160,7 +190,7 @@ export const googleAuth = async (req, res) => {
       sameSite: "Strict",
       maxAge: 10 * 365 * 24 * 60 * 60 * 1000,
     });
-    return res.status(200).json(user);
+    return res.status(200).json(userObj);
   } catch (error) {
     return res.status(500).json({ message: `GoogleAuth error ${error}` });
   }

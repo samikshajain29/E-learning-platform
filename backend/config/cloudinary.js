@@ -14,11 +14,16 @@ const uploadOnCloudinary = async (filePath) => {
     }
     const uploadResult = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto",
+      access_mode: "public"
     });
-    fs.unlinkSync(filePath);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
     return uploadResult.secure_url;
   } catch (error) {
-    fs.unlinkSync(filePath);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
     console.log(error);
   }
 };

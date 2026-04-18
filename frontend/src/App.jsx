@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import { ToastContainer, toast } from "react-toastify";
+import { ClipLoader } from "react-spinners";
 import getCurrentUser from "./customHooks/getCurrentUser";
 import { useSelector } from "react-redux";
 import Profile from "./pages/Profile";
@@ -36,7 +37,16 @@ function App() {
   getPublishedCourse();
   getAllReviews();
 
-  const { userData } = useSelector((state) => state.user);
+  const { userData, authLoading } = useSelector((state) => state.user);
+
+  const ProtectedEducatorRoute = ({ children }) => {
+    if (authLoading) return <div className="flex justify-center items-center h-[80vh]"><ClipLoader size={50} color="black" /></div>;
+    if (!userData) return <Navigate to="/login" />;
+    if (userData.role !== "educator") return <Navigate to="/" />;
+    if (userData.educatorStatus !== "approved") return <Navigate to="/apply-educator" />;
+    return children;
+  };
+
   return (
     <>
       <ToastContainer />
@@ -66,87 +76,31 @@ function App() {
         />
         <Route
           path="/dashboard"
-          element={
-            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
-              <Dashboard />
-            ) : (
-              <Navigate to={"/apply-educator"} />
-            ) : (
-              <Navigate to={"/signup"} />
-            )
-          }
+          element={<ProtectedEducatorRoute><Dashboard /></ProtectedEducatorRoute>}
         />
         <Route
           path="/courses"
-          element={
-            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
-              <Courses />
-            ) : (
-              <Navigate to={"/apply-educator"} />
-            ) : (
-              <Navigate to={"/signup"} />
-            )
-          }
+          element={<ProtectedEducatorRoute><Courses /></ProtectedEducatorRoute>}
         />
         <Route
           path="/createcourse"
-          element={
-            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
-              <CreateCourses />
-            ) : (
-              <Navigate to={"/apply-educator"} />
-            ) : (
-              <Navigate to={"/signup"} />
-            )
-          }
+          element={<ProtectedEducatorRoute><CreateCourses /></ProtectedEducatorRoute>}
         />
         <Route
           path="/editcourse/:courseId"
-          element={
-            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
-              <EditCourse />
-            ) : (
-              <Navigate to={"/apply-educator"} />
-            ) : (
-              <Navigate to={"/signup"} />
-            )
-          }
+          element={<ProtectedEducatorRoute><EditCourse /></ProtectedEducatorRoute>}
         />
         <Route
           path="/createlecture/:courseId"
-          element={
-            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
-              <CreateLecture />
-            ) : (
-              <Navigate to={"/apply-educator"} />
-            ) : (
-              <Navigate to={"/signup"} />
-            )
-          }
+          element={<ProtectedEducatorRoute><CreateLecture /></ProtectedEducatorRoute>}
         />
         <Route
           path="/create-assignment/:courseId"
-          element={
-            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
-              <CreateAssignment />
-            ) : (
-              <Navigate to={"/apply-educator"} />
-            ) : (
-              <Navigate to={"/signup"} />
-            )
-          }
+          element={<ProtectedEducatorRoute><CreateAssignment /></ProtectedEducatorRoute>}
         />
         <Route
           path="/editlecture/:courseId/:lectureId"
-          element={
-            userData?.role === "educator" ? userData?.hasAppliedForEducator ? (
-              <EditLecture />
-            ) : (
-              <Navigate to={"/apply-educator"} />
-            ) : (
-              <Navigate to={"/signup"} />
-            )
-          }
+          element={<ProtectedEducatorRoute><EditLecture /></ProtectedEducatorRoute>}
         />
         <Route
           path="/viewcourse/:courseId"

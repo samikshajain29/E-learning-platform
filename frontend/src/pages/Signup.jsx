@@ -9,7 +9,7 @@ import { serverUrl } from "../App";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserData } from "../redux/userSlice";
+import { setUserData, setAuthLoading } from "../redux/userSlice";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../utils/firebase";
 
@@ -22,12 +22,12 @@ function Signup() {
   const [role, setRole] = useState("student");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { userData } = useSelector((state) => state.user);
+  const { userData, authLoading } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (userData) {
+    if (userData && !authLoading) {
       if (userData.role === "educator") {
-        if (userData.hasAppliedForEducator) {
+        if (userData.educatorStatus === "approved") {
           navigate("/dashboard");
         } else {
           navigate("/apply-educator");
@@ -36,7 +36,7 @@ function Signup() {
         navigate("/");
       }
     }
-  }, [userData, navigate]);
+  }, [userData, authLoading, navigate]);
 
   const handleSignup = async () => {
     setLoading(true);
@@ -46,6 +46,7 @@ function Signup() {
         { name, email, password, role },
         { withCredentials: true }
       );
+      dispatch(setAuthLoading(false));
       dispatch(setUserData(result.data));
       setLoading(false);
       toast.success("Signup Successfully");
@@ -66,6 +67,7 @@ function Signup() {
         { name, email, role },
         { withCredentials: true }
       );
+      dispatch(setAuthLoading(false));
       dispatch(setUserData(result.data));
       toast.success("Signup Successfully");
     } catch (error) {

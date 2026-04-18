@@ -10,7 +10,7 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { ClipLoader } from "react-spinners";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserData } from "../redux/userSlice";
+import { setUserData, setAuthLoading } from "../redux/userSlice";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../utils/firebase";
 
@@ -24,14 +24,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { userData } = useSelector((state) => state.user);
+  const { userData, authLoading } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (userData) {
+    if (userData && !authLoading) {
       if (redirectPath && redirectPath !== "/") {
         navigate(redirectPath);
       } else if (userData.role === "educator") {
-        if (userData.hasAppliedForEducator) {
+        if (userData.educatorStatus === "approved") {
           navigate("/dashboard");
         } else {
           navigate("/apply-educator");
@@ -40,7 +40,7 @@ function Login() {
         navigate("/");
       }
     }
-  }, [userData, navigate, redirectPath]);
+  }, [userData, authLoading, navigate, redirectPath]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -50,13 +50,14 @@ function Login() {
         { email, password },
         { withCredentials: true }
       );
+      dispatch(setAuthLoading(false));
       dispatch(setUserData(result.data));
       setLoading(false);
       toast.success("Login Successfully");
     } catch (error) {
       console.log(error);
       setLoading(false);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Login failed");
     }
   };
   const googleLogin = async () => {
@@ -71,11 +72,12 @@ function Login() {
         { name, email, role },
         { withCredentials: true }
       );
+      dispatch(setAuthLoading(false));
       dispatch(setUserData(result.data));
       toast.success("Login Successfully");
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Google auth failed");
     }
   };
   return (
