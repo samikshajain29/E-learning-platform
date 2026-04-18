@@ -1,13 +1,15 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LayoutDashboard, LogOut } from "lucide-react";
+import logo from "../assets/logo.jpg";
 
 const Sidebar = () => {
   const { logout } = useAuth();
 
   return (
     <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-50">
-      <div className="h-16 flex items-center px-6 border-b border-gray-200">
+      <div className="h-16 flex items-center px-6 gap-[10px] border-b border-gray-200">
+        <img src={logo} alt="logo" className="w-[50px] h-[50px] rounded-full" />
         <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
           Admin Panel
         </h1>
