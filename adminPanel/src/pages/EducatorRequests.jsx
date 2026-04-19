@@ -43,11 +43,10 @@ const EducatorRequests = () => {
       setRequests(res.data);
     } catch (err) {
       console.error(err);
-      if (err.response?.status === 401) {
-        window.location.href = "/login";
-        return;
+      // 401 is handled globally by the axios interceptor (auto-redirect to login)
+      if (err.response?.status !== 401 && !isBackground) {
+        setError("Failed to fetch pending educator requests.");
       }
-      if (!isBackground) setError("Failed to fetch pending educator requests.");
     } finally {
       if (!isBackground) setLoading(false);
     }
@@ -71,11 +70,10 @@ const EducatorRequests = () => {
       
     } catch (err) {
       console.error(err);
-      if (err.response?.status === 401) {
-        window.location.href = "/login";
-        return;
+      // 401 is handled globally by the axios interceptor (auto-redirect to login)
+      if (err.response?.status !== 401) {
+        setActionError(err.response?.data?.message || `Failed to mark as ${status}`);
       }
-      setActionError(err.response?.data?.message || `Failed to mark as ${status}`);
     } finally {
       setActionLoading(false);
     }

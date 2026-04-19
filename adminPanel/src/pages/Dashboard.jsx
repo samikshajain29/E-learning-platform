@@ -19,34 +19,41 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        // Fetch stats and analytics concurrently
-        const [statsRes, analyticsRes] = await Promise.all([
-          axios.get(`${API_URL}/admin/dashboard-stats`),
-          axios.get(`${API_URL}/admin/analytics`)
-        ]);
+  const fetchDashboardData = async (isBackground = false) => {
+    try {
+      if (!isBackground) setLoading(true);
+      // Fetch stats and analytics concurrently
+      const [statsRes, analyticsRes] = await Promise.all([
+        axios.get(`${API_URL}/admin/dashboard-stats`),
+        axios.get(`${API_URL}/admin/analytics`)
+      ]);
 
-        setStats(statsRes.data);
-        
-        // Reverse because backend gave us 30 days ago to today (or today to 30 days ago).
-        // The backend loop was from 29 to 0, which means older to newer.
-        setAnalytics(analyticsRes.data);
-      } catch (err) {
-        if (err.response?.status === 401 || err.response?.status === 403) {
-          setError("Not authorized. Please login again.");
-        } else {
-          setError("Failed to fetch dashboard data. Please try again later.");
-        }
-        console.error(err);
-      } finally {
-        setLoading(false);
+      setStats(statsRes.data);
+      
+      // Reverse because backend gave us 30 days ago to today (or today to 30 days ago).
+      // The backend loop was from 29 to 0, which means older to newer.
+      setAnalytics(analyticsRes.data);
+      if (!isBackground) setError(null);
+    } catch (err) {
+      // 401 is handled globally by the axios interceptor (auto-redirect to login)
+      if (err.response?.status !== 401 && !isBackground) {
+        setError("Failed to fetch dashboard data. Please try again later.");
       }
-    };
+      console.error(err);
+    } finally {
+      if (!isBackground) setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchDashboardData();
+
+    // Auto-refresh stats every 10 seconds to reflect approve/reject changes in real-time
+    const interval = setInterval(() => {
+      fetchDashboardData(true);
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
