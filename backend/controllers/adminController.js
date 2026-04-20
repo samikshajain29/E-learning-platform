@@ -228,3 +228,32 @@ export const updateEducatorRequestStatus = async (req, res) => {
     return res.status(500).json({ message: "Server error updating request status" });
   }
 };
+
+// @desc    Get count of unseen pending educator requests (for sidebar badge)
+// @route   GET /api/admin/educator-requests/unseen-count
+// @access  Private (Admin only)
+export const getUnseenRequestCount = async (req, res) => {
+  try {
+    const count = await EducatorRequest.countDocuments({ status: "pending", isSeen: false });
+    return res.status(200).json({ count });
+  } catch (error) {
+    console.error("Error fetching unseen request count:", error);
+    return res.status(500).json({ message: "Server error fetching unseen count" });
+  }
+};
+
+// @desc    Mark all unseen pending requests as seen
+// @route   PATCH /api/admin/educator-requests/mark-seen
+// @access  Private (Admin only)
+export const markRequestsAsSeen = async (req, res) => {
+  try {
+    await EducatorRequest.updateMany(
+      { status: "pending", isSeen: false },
+      { $set: { isSeen: true } }
+    );
+    return res.status(200).json({ message: "All pending requests marked as seen" });
+  } catch (error) {
+    console.error("Error marking requests as seen:", error);
+    return res.status(500).json({ message: "Server error marking requests as seen" });
+  }
+};

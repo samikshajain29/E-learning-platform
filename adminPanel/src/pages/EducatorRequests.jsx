@@ -36,6 +36,18 @@ const EducatorRequests = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Mark all unseen requests as seen when admin opens this page
+  useEffect(() => {
+    const markAsSeen = async () => {
+      try {
+        await axios.patch(`${API_URL}/admin/educator-requests/mark-seen`, {}, getAuthHeaders());
+      } catch (err) {
+        // Silently fail — 401 handled globally
+      }
+    };
+    markAsSeen();
+  }, []);
+
   const fetchRequests = async (isBackground = false) => {
     try {
       if (!isBackground) setLoading(true);

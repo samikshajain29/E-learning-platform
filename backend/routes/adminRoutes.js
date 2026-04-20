@@ -5,7 +5,9 @@ import {
   getAnalytics,
   getPendingEducatorRequests,
   getEducatorRequestDetails,
-  updateEducatorRequestStatus
+  updateEducatorRequestStatus,
+  getUnseenRequestCount,
+  markRequestsAsSeen
 } from "../controllers/adminController.js";
 import { adminAuth } from "../middlewares/adminAuth.js";
 
@@ -17,6 +19,8 @@ router.get("/analytics", adminAuth, getAnalytics);
 
 // Educator Request routes
 router.get("/educator-requests", adminAuth, getPendingEducatorRequests);
+router.get("/educator-requests/unseen-count", adminAuth, getUnseenRequestCount);
+router.patch("/educator-requests/mark-seen", adminAuth, markRequestsAsSeen);
 router.get("/educator-request/:id", adminAuth, getEducatorRequestDetails);
 router.patch("/educator-request/:id", adminAuth, updateEducatorRequestStatus);
 

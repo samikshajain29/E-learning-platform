@@ -1,10 +1,44 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LayoutDashboard, LogOut } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import axios from "axios";
 import logo from "../assets/logo.jpg";
 
+const API_URL = "http://localhost:8000/api";
+
 const Sidebar = () => {
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
+  const location = useLocation();
+  const [unseenCount, setUnseenCount] = useState(0);
+  const intervalRef = useRef(null);
+
+  const fetchUnseenCount = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const res = await axios.get(`${API_URL}/admin/educator-requests/unseen-count`);
+      setUnseenCount(res.data.count);
+    } catch (err) {
+      // Silently fail — 401 handled globally by interceptor
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchUnseenCount();
+
+    // Poll every 10 seconds for near-real-time badge updates
+    intervalRef.current = setInterval(fetchUnseenCount, 10000);
+
+    return () => clearInterval(intervalRef.current);
+  }, [fetchUnseenCount]);
+
+  // When navigating TO the educator-requests page, reset count immediately
+  // (the EducatorRequests page will call mark-seen)
+  useEffect(() => {
+    if (location.pathname === "/admin/educator-requests") {
+      setUnseenCount(0);
+    }
+  }, [location.pathname]);
 
   return (
     <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-50">
@@ -31,13 +65,22 @@ const Sidebar = () => {
 
         <NavLink
           to="/admin/educator-requests"
-          className="flex justify-center items-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-black hover:text-white rounded-lg transition-colors font-medium"
+          className="flex justify-center items-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-black hover:text-white rounded-lg transition-colors font-medium relative"
         >
           Educator Requests
+          {unseenCount > 0 && (
+            <span
+              className="absolute -top-2 -right-2 min-w-[22px] h-[22px] flex items-center justify-center px-1.5 text-xs font-bold text-white rounded-full shadow-md"
+              style={{
+                background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                animation: "badgePulse 2s ease-in-out infinite",
+              }}
+            >
+              {unseenCount > 99 ? "99+" : unseenCount}
+            </span>
+          )}
         </NavLink>
       </div>
-
-
 
       <div className="p-4 border-t border-gray-200">
         <button
@@ -48,6 +91,14 @@ const Sidebar = () => {
           Logout
         </button>
       </div>
+
+      {/* Badge pulse animation */}
+      <style>{`
+        @keyframes badgePulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
+        }
+      `}</style>
     </div>
   );
 };
