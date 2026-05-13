@@ -40,7 +40,16 @@ export const getDashboardStats = async (req, res) => {
     const courses = await Course.find({});
 
     const totalUsers = users.filter((u) => u.role === "student").length;
-    const totalEducators = users.filter((u) => u.role === "educator").length;
+
+    // Count only approved educators:
+    // 1. Users who have an approved EducatorRequest
+    const approvedRequestCount = await EducatorRequest.countDocuments({ status: "approved" });
+    // 2. Legacy educators (role=educator but no EducatorRequest entry — pre-existing approved educators)
+    const educatorUserIds = users.filter((u) => u.role === "educator").map((u) => u._id);
+    const educatorsWithRequests = await EducatorRequest.find({ userId: { $in: educatorUserIds } }).select("userId");
+    const educatorIdsWithRequest = new Set(educatorsWithRequests.map((r) => r.userId.toString()));
+    const legacyEducatorCount = educatorUserIds.filter((id) => !educatorIdsWithRequest.has(id.toString())).length;
+    const totalEducators = approvedRequestCount + legacyEducatorCount;
     const totalCourses = courses.length;
     const activeCourses = courses.filter((c) => c.status === "ongoing" || c.isPublished).length;
 
@@ -200,12 +209,51 @@ export const updateEducatorRequestStatus = async (req, res) => {
       });
     }
 
+    // Compute updated approved educator count for real-time frontend update
+    const approvedRequestCount = await EducatorRequest.countDocuments({ status: "approved" });
+    const allEducators = await User.find({ role: "educator" }).select("_id");
+    const educatorUserIds = allEducators.map((u) => u._id);
+    const educatorsWithRequests = await EducatorRequest.find({ userId: { $in: educatorUserIds } }).select("userId");
+    const educatorIdsWithRequest = new Set(educatorsWithRequests.map((r) => r.userId.toString()));
+    const legacyEducatorCount = educatorUserIds.filter((id) => !educatorIdsWithRequest.has(id.toString())).length;
+    const totalEducators = approvedRequestCount + legacyEducatorCount;
+
     return res.status(200).json({ 
       message: `Educator request ${status} successfully`, 
-      request: updatedRequest
+      request: updatedRequest,
+      totalEducators
     });
   } catch (error) {
     console.error("Error updating educator request status:", error);
     return res.status(500).json({ message: "Server error updating request status" });
+  }
+};
+
+// @desc    Get count of unseen pending educator requests (for sidebar badge)
+// @route   GET /api/admin/educator-requests/unseen-count
+// @access  Private (Admin only)
+export const getUnseenRequestCount = async (req, res) => {
+  try {
+    const count = await EducatorRequest.countDocuments({ status: "pending", isSeen: false });
+    return res.status(200).json({ count });
+  } catch (error) {
+    console.error("Error fetching unseen request count:", error);
+    return res.status(500).json({ message: "Server error fetching unseen count" });
+  }
+};
+
+// @desc    Mark all unseen pending requests as seen
+// @route   PATCH /api/admin/educator-requests/mark-seen
+// @access  Private (Admin only)
+export const markRequestsAsSeen = async (req, res) => {
+  try {
+    await EducatorRequest.updateMany(
+      { status: "pending", isSeen: false },
+      { $set: { isSeen: true } }
+    );
+    return res.status(200).json({ message: "All pending requests marked as seen" });
+  } catch (error) {
+    console.error("Error marking requests as seen:", error);
+    return res.status(500).json({ message: "Server error marking requests as seen" });
   }
 };
