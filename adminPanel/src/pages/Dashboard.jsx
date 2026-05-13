@@ -12,7 +12,7 @@ import {
   Activity
 } from "lucide-react";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = "https://e-learning-platform-server-dgpe.onrender.com/api";
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
