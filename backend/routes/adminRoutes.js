@@ -7,7 +7,8 @@ import {
   getEducatorRequestDetails,
   updateEducatorRequestStatus,
   getUnseenRequestCount,
-  markRequestsAsSeen
+  markRequestsAsSeen,
+  getEducatorEarnings
 } from "../controllers/adminController.js";
 import { adminAuth } from "../middlewares/adminAuth.js";
 
@@ -16,6 +17,7 @@ const router = express.Router();
 router.post("/login", adminLogin);
 router.get("/dashboard-stats", adminAuth, getDashboardStats);
 router.get("/analytics", adminAuth, getAnalytics);
+router.get("/educator-earnings", adminAuth, getEducatorEarnings);
 
 // Educator Request routes
 router.get("/educator-requests", adminAuth, getPendingEducatorRequests);

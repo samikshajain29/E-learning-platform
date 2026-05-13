@@ -5,6 +5,7 @@ import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import EducatorRequests from "./pages/EducatorRequests";
+import EducatorEarnings from "./pages/EducatorEarnings";
 
 const AdminLayout = ({ children }) => {
   return (
@@ -31,6 +32,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/admin/educator-requests" element={<EducatorRequests />} />
+                  <Route path="/admin/educator-earnings" element={<EducatorEarnings />} />
                   {/* Add more protected routes here in future */}
                 </Routes>
               </AdminLayout>

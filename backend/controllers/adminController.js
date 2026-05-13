@@ -36,46 +36,72 @@ export const adminLogin = (req, res) => {
 // @access  Private (Admin only)
 export const getDashboardStats = async (req, res) => {
   try {
-    const users = await User.find({}).populate("enrollmentDates.course");
-    const courses = await Course.find({});
-
-    const totalUsers = users.filter((u) => u.role === "student").length;
+    // --- User & Educator counts ---
+    const totalUsers = await User.countDocuments({ role: "student" });
 
     // Count only approved educators:
     // 1. Users who have an approved EducatorRequest
     const approvedRequestCount = await EducatorRequest.countDocuments({ status: "approved" });
     // 2. Legacy educators (role=educator but no EducatorRequest entry — pre-existing approved educators)
-    const educatorUserIds = users.filter((u) => u.role === "educator").map((u) => u._id);
+    const educatorUsers = await User.find({ role: "educator" }).select("_id");
+    const educatorUserIds = educatorUsers.map((u) => u._id);
     const educatorsWithRequests = await EducatorRequest.find({ userId: { $in: educatorUserIds } }).select("userId");
     const educatorIdsWithRequest = new Set(educatorsWithRequests.map((r) => r.userId.toString()));
     const legacyEducatorCount = educatorUserIds.filter((id) => !educatorIdsWithRequest.has(id.toString())).length;
     const totalEducators = approvedRequestCount + legacyEducatorCount;
+
+    // --- Course counts ---
+    const courses = await Course.find({}).select("status isPublished");
     const totalCourses = courses.length;
     const activeCourses = courses.filter((c) => c.status === "ongoing" || c.isPublished).length;
 
-    let totalRevenue = 0;
-    let todayRevenue = 0;
-    let todayEnrollments = 0;
+    // --- Total Revenue (all educators combined) ---
+    // Aggregate from Course collection: sum(price × enrolledStudents count)
+    // This captures every successful enrollment including legacy ones that may
+    // not have an enrollmentDates entry, and matches educator earnings logic.
+    const revenueResult = await Course.aggregate([
+      {
+        $project: {
+          price: { $ifNull: ["$price", 0] },
+          enrolledCount: { $size: { $ifNull: ["$enrolledStudents", []] } },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: { $multiply: ["$price", "$enrolledCount"] } },
+        },
+      },
+    ]);
+    const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
 
+    // --- Today's enrollments & revenue ---
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
+    today.setHours(0, 0, 0, 0);
 
-    users.forEach((user) => {
-      user.enrollmentDates.forEach((enrollment) => {
-        if (!enrollment.course) return; // if course population failed or course deleted
+    const todayStats = await User.aggregate([
+      { $unwind: "$enrollmentDates" },
+      { $match: { "enrollmentDates.enrolledAt": { $gte: today } } },
+      {
+        $lookup: {
+          from: "courses",
+          localField: "enrollmentDates.course",
+          foreignField: "_id",
+          as: "courseData",
+        },
+      },
+      { $unwind: { path: "$courseData", preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: null,
+          todayEnrollments: { $sum: 1 },
+          todayRevenue: { $sum: { $ifNull: ["$courseData.price", 0] } },
+        },
+      },
+    ]);
 
-        const coursePrice = enrollment.course.price || 0;
-        totalRevenue += coursePrice;
-
-        const enrollmentDate = new Date(enrollment.enrolledAt);
-        enrollmentDate.setHours(0, 0, 0, 0);
-
-        if (enrollmentDate.getTime() === today.getTime()) {
-          todayEnrollments += 1;
-          todayRevenue += coursePrice;
-        }
-      });
-    });
+    const todayEnrollments = todayStats.length > 0 ? todayStats[0].todayEnrollments : 0;
+    const todayRevenue = todayStats.length > 0 ? todayStats[0].todayRevenue : 0;
 
     return res.status(200).json({
       totalUsers,
@@ -255,5 +281,67 @@ export const markRequestsAsSeen = async (req, res) => {
   } catch (error) {
     console.error("Error marking requests as seen:", error);
     return res.status(500).json({ message: "Server error marking requests as seen" });
+  }
+};
+
+// @desc    Get per-educator earnings breakdown for admin
+// @route   GET /api/admin/educator-earnings
+// @access  Private (Admin only)
+export const getEducatorEarnings = async (req, res) => {
+  try {
+    const educators = await Course.aggregate([
+      // Stage 1: Project fields needed for calculation
+      {
+        $project: {
+          creator: 1,
+          price: { $ifNull: ["$price", 0] },
+          enrolledCount: { $size: { $ifNull: ["$enrolledStudents", []] } },
+        },
+      },
+      // Stage 2: Calculate revenue per course
+      {
+        $addFields: {
+          revenue: { $multiply: ["$price", "$enrolledCount"] },
+        },
+      },
+      // Stage 3: Group by educator (creator)
+      {
+        $group: {
+          _id: "$creator",
+          totalCourses: { $sum: 1 },
+          totalStudents: { $sum: "$enrolledCount" },
+          totalEarnings: { $sum: "$revenue" },
+        },
+      },
+      // Stage 4: Lookup educator details from users collection
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "educatorInfo",
+        },
+      },
+      { $unwind: "$educatorInfo" },
+      // Stage 5: Shape the output
+      {
+        $project: {
+          _id: 1,
+          name: "$educatorInfo.name",
+          email: "$educatorInfo.email",
+          photoUrl: "$educatorInfo.photoUrl",
+          totalCourses: 1,
+          totalStudents: 1,
+          totalEarnings: 1,
+        },
+      },
+      // Stage 6: Sort by highest earnings first
+      { $sort: { totalEarnings: -1 } },
+    ]);
+
+    return res.status(200).json(educators);
+  } catch (error) {
+    console.error("Error in getEducatorEarnings:", error);
+    return res.status(500).json({ message: "Server error fetching educator earnings" });
   }
 };

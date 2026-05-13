@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ReactApexChart from "react-apexcharts";
 import { 
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const [analytics, setAnalytics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const fetchDashboardData = async (isBackground = false) => {
     try {
@@ -108,7 +110,8 @@ const Dashboard = () => {
       title: "Total Educators",
       value: stats?.totalEducators || 0,
       icon: GraduationCap,
-      color: "bg-indigo-500"
+      color: "bg-indigo-500",
+      link: "/admin/educator-earnings"
     },
     {
       title: "Total Courses",
@@ -179,13 +182,24 @@ const Dashboard = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {statCards.map((card, index) => (
-          <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center space-x-4">
+          <div
+            key={index}
+            onClick={() => card.link && navigate(card.link)}
+            className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center space-x-4 transition-all ${
+              card.link
+                ? "cursor-pointer hover:shadow-md hover:border-purple-200 hover:-translate-y-0.5"
+                : ""
+            }`}
+          >
             <div className={`p-4 rounded-lg text-white ${card.color}`}>
               <card.icon size={24} />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500">{card.title}</p>
               <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+              {card.link && (
+                <p className="text-xs text-purple-500 mt-1 font-medium">Click to view details →</p>
+              )}
             </div>
           </div>
         ))}
