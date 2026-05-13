@@ -29,7 +29,7 @@ import getAllReviews from "./customHooks/getAllReviews";
 import SearchWithAi from "./pages/SearchWithAi";
 import EducatorProfile from "./pages/EducatorProfile"; // Import the new component
 import WishlistPage from "./pages/WishlistPage";
-export const serverUrl = "http://localhost:8000";
+export const serverUrl = "https://e-learning-platform-server-dgpe.onrender.com";
 
 function App() {
   getCurrentUser();
