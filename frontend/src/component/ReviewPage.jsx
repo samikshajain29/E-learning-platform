@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
-import ReviewCard from "./reviewCard";
+import ReviewCard from "./ReviewCard";
 import { useState } from "react";
 
 function ReviewPage() {
