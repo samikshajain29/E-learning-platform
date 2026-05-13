@@ -25,10 +25,8 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
       "https://e-learning-platform-frontend-dl4b.onrender.com",
-      "https://e-learning-platform-adminpanel.onrender.com",
+      "https://e-learning-platform-adminpanel.onrender.com"
     ],
     credentials: true,
   })
