@@ -11,7 +11,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = "https://e-learning-platform-server-dgpe.onrender.com/api";
 
 const EducatorEarnings = () => {
   const [educators, setEducators] = useState([]);
