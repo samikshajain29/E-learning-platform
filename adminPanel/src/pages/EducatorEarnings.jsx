@@ -78,9 +78,9 @@ const EducatorEarnings = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <button
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-4 group"
@@ -88,8 +88,8 @@ const EducatorEarnings = () => {
           <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Back to Dashboard</span>
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Educator Earnings</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Educator Earnings</h1>
+        <p className="text-sm md:text-base text-gray-500 mt-1">
           Detailed earnings breakdown for all educators on the platform
         </p>
       </div>
@@ -129,14 +129,14 @@ const EducatorEarnings = () => {
 
       {/* Search Bar */}
       <div className="mb-6">
-        <div className="relative max-w-md">
+        <div className="relative w-full sm:max-w-md">
           <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search educators by name or email..."
+            placeholder="Search educators..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
           />
         </div>
       </div>
