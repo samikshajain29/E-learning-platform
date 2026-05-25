@@ -6,7 +6,7 @@ import {
   BadgeCheck 
 } from "lucide-react";
 
-const API_URL = "https://e-learning-platform-server-dgpe.onrender.com/api";
+const API_URL = "http://localhost:8000/api";
 
 const EducatorRequests = () => {
   const [requests, setRequests] = useState([]);

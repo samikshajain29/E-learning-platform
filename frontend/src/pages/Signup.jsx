@@ -22,10 +22,14 @@ function Signup() {
   const [role, setRole] = useState("student");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { userData, authLoading } = useSelector((state) => state.user);
+  const { userData, authLoading, authChecked } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (userData && !authLoading) {
+    // Only redirect after the initial auth verification is complete.
+    // This prevents false redirects on page refresh before the backend
+    // has confirmed whether the user is actually logged in.
+    if (!authChecked || authLoading) return;
+    if (userData) {
       if (userData.role === "educator") {
         if (userData.educatorStatus === "approved") {
           navigate("/dashboard");
@@ -36,7 +40,7 @@ function Signup() {
         navigate("/");
       }
     }
-  }, [userData, authLoading, navigate]);
+  }, [userData, authLoading, authChecked, navigate]);
 
   const handleSignup = async () => {
     setLoading(true);

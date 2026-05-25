@@ -24,10 +24,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { userData, authLoading } = useSelector((state) => state.user);
+  const { userData, authLoading, authChecked } = useSelector((state) => state.user);
 
   useEffect(() => {
-    if (userData && !authLoading) {
+    // Only redirect after the initial auth verification is complete.
+    // This prevents false redirects on page refresh before the backend
+    // has confirmed whether the user is actually logged in.
+    if (!authChecked || authLoading) return;
+    if (userData) {
       if (redirectPath && redirectPath !== "/") {
         navigate(redirectPath);
       } else if (userData.role === "educator") {
@@ -40,7 +44,7 @@ function Login() {
         navigate("/");
       }
     }
-  }, [userData, authLoading, navigate, redirectPath]);
+  }, [userData, authLoading, authChecked, navigate, redirectPath]);
 
   const handleLogin = async () => {
     setLoading(true);

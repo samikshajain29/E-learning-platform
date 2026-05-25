@@ -29,7 +29,7 @@ import getAllReviews from "./customHooks/getAllReviews";
 import SearchWithAi from "./pages/SearchWithAi";
 import EducatorProfile from "./pages/EducatorProfile"; // Import the new component
 import WishlistPage from "./pages/WishlistPage";
-export const serverUrl = "https://e-learning-platform-server-dgpe.onrender.com";
+export const serverUrl = "http://localhost:8000";
 
 function App() {
   getCurrentUser();
@@ -37,10 +37,38 @@ function App() {
   getPublishedCourse();
   getAllReviews();
 
-  const { userData, authLoading } = useSelector((state) => state.user);
+  const { userData, authLoading, authChecked } = useSelector((state) => state.user);
 
+  // Shows a loading spinner until the initial auth check completes.
+  // Prevents any premature redirects based on stale/uninitialized state.
+  const AuthGuard = ({ children }) => {
+    if (!authChecked || authLoading) {
+      return (
+        <div className="flex justify-center items-center h-[80vh]">
+          <ClipLoader size={50} color="black" />
+        </div>
+      );
+    }
+    return children;
+  };
+
+  // Wraps routes that require an authenticated user.
+  // Waits for auth check to finish, then redirects unauthenticated users.
+  const ProtectedRoute = ({ children }) => {
+    if (!authChecked || authLoading) {
+      return (
+        <div className="flex justify-center items-center h-[80vh]">
+          <ClipLoader size={50} color="black" />
+        </div>
+      );
+    }
+    if (!userData) return <Navigate to="/signup" />;
+    return children;
+  };
+
+  // Wraps educator-only routes. Waits for auth, then checks role + approval.
   const ProtectedEducatorRoute = ({ children }) => {
-    if (authLoading) return <div className="flex justify-center items-center h-[80vh]"><ClipLoader size={50} color="black" /></div>;
+    if (!authChecked || authLoading) return <div className="flex justify-center items-center h-[80vh]"><ClipLoader size={50} color="black" /></div>;
     if (!userData) return <Navigate to="/login" />;
     if (userData.role !== "educator") return <Navigate to="/" />;
     if (userData.educatorStatus !== "approved") return <Navigate to="/apply-educator" />;
@@ -60,19 +88,23 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route
           path="/profile"
-          element={userData ? <Profile /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><Profile /></ProtectedRoute>}
         />
         <Route
           path="/forget"
-          element={!userData ? <ForgetPassword /> : <Navigate to={"/signup"} />}
+          element={
+            <AuthGuard>
+              {!userData ? <ForgetPassword /> : <Navigate to={"/signup"} />}
+            </AuthGuard>
+          }
         />
         <Route
           path="/editprofile"
-          element={userData ? <EditProfile /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><EditProfile /></ProtectedRoute>}
         />
         <Route
           path="/allcourses"
-          element={userData ? <AllCourses /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><AllCourses /></ProtectedRoute>}
         />
         <Route
           path="/dashboard"
@@ -104,34 +136,36 @@ function App() {
         />
         <Route
           path="/viewcourse/:courseId"
-          element={userData ? <ViewCourse /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><ViewCourse /></ProtectedRoute>}
         />
         <Route
           path="/viewlecture/:courseId"
-          element={userData ? <ViewLectures /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><ViewLectures /></ProtectedRoute>}
         />
         <Route
           path="/mycourses"
-          element={
-            userData ? <MyEnrolledCourses /> : <Navigate to={"/signup"} />
-          }
+          element={<ProtectedRoute><MyEnrolledCourses /></ProtectedRoute>}
         />
         <Route
           path="/search"
-          element={userData ? <SearchWithAi /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><SearchWithAi /></ProtectedRoute>}
         />
         {/* New route for Educator Profile */}
         <Route
           path="/educator/:educatorId"
-          element={userData ? <EducatorProfile /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><EducatorProfile /></ProtectedRoute>}
         />
         <Route
           path="/wishlist"
-          element={userData ? <WishlistPage /> : <Navigate to={"/signup"} />}
+          element={<ProtectedRoute><WishlistPage /></ProtectedRoute>}
         />
         <Route
           path="/apply-educator"
-          element={userData ? <ApplyEducator /> : <Navigate to={"/login?redirect=/apply-educator"} />}
+          element={
+            <AuthGuard>
+              {userData ? <ApplyEducator /> : <Navigate to={"/login?redirect=/apply-educator"} />}
+            </AuthGuard>
+          }
         />
       </Routes>
     </>
