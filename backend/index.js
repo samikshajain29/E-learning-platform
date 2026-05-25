@@ -22,14 +22,18 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.ADMIN_URL,
+  "https://e-learning-platform-frontend-dl4b.onrender.com",
+  "https://e-learning-platform-adminpanel.onrender.com",
+  "http://localhost:5173",
+  "http://localhost:5174"
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: [
-      "https://e-learning-platform-frontend-dl4b.onrender.com",
-      "https://e-learning-platform-adminpanel.onrender.com",
-      "http://localhost:5173",
-      "http://localhost:5174"
-    ],
+    origin: allowedOrigins,
     credentials: true,
   })
 );

@@ -5,7 +5,7 @@ import axios from "axios";
 import { Lock, Mail } from "lucide-react";
 
 // Assuming backend runs on 5000 as per common configuration and MERN standard
-const API_URL = "http://localhost:8000/api";
+const API_URL = (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "http://localhost:8000/api");
 
 const Login = () => {
   const [email, setEmail] = useState("");
