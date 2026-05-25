@@ -76,7 +76,8 @@ function Signup() {
       toast.success("Signup Successfully");
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
+      dispatch(setAuthLoading(false));
+      toast.error(error.response?.data?.message || error.message || "Google signup failed");
     }
   };
   return (

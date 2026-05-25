@@ -225,11 +225,10 @@ const EducatorEarnings = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span
-                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold ${
-                          edu.totalEarnings > 0
+                        className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold ${edu.totalEarnings > 0
                             ? "bg-emerald-50 text-emerald-700"
                             : "bg-gray-50 text-gray-500"
-                        }`}
+                          }`}
                       >
                         {edu.totalEarnings > 0 && <TrendingUp size={14} />}
                         ₹{edu.totalEarnings.toLocaleString("en-IN")}

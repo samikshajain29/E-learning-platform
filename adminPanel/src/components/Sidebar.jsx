@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import logo from "../assets/logo.jpg";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "http://localhost:8000/api");
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const { logout, isAuthenticated } = useAuth();
@@ -50,7 +50,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           Admin Panel
         </h1>
         {/* Close button for mobile inside sidebar */}
-        <button 
+        <button
           onClick={() => setIsOpen(false)}
           className="md:hidden ml-auto p-2 text-gray-400 hover:text-gray-600"
         >

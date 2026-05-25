@@ -25,7 +25,7 @@ const Login = () => {
         email,
         password,
       });
-      
+
       login(response.data.token, response.data.user);
       navigate("/");
     } catch (err) {
@@ -95,9 +95,8 @@ const Login = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors ${
-              isLoading ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors ${isLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>

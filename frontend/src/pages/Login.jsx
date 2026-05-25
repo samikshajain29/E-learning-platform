@@ -81,7 +81,8 @@ function Login() {
       toast.success("Login Successfully");
     } catch (error) {
       console.log(error);
-      toast.error(error.response?.data?.message || "Google auth failed");
+      dispatch(setAuthLoading(false));
+      toast.error(error.response?.data?.message || error.message || "Google auth failed");
     }
   };
   return (

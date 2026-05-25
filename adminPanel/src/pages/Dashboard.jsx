@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ReactApexChart from "react-apexcharts";
-import { 
-  Users, 
-  GraduationCap, 
-  BookOpen, 
-  IndianRupee, 
+import {
+  Users,
+  GraduationCap,
+  BookOpen,
+  IndianRupee,
   PlayCircle,
   TrendingUp,
   Activity
@@ -31,7 +31,7 @@ const Dashboard = () => {
       ]);
 
       setStats(statsRes.data);
-      
+
       // Reverse because backend gave us 30 days ago to today (or today to 30 days ago).
       // The backend loop was from 29 to 0, which means older to newer.
       setAnalytics(analyticsRes.data);
@@ -185,11 +185,10 @@ const Dashboard = () => {
           <div
             key={index}
             onClick={() => card.link && navigate(card.link)}
-            className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center space-x-4 transition-all ${
-              card.link
+            className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center space-x-4 transition-all ${card.link
                 ? "cursor-pointer hover:shadow-md hover:border-purple-200 hover:-translate-y-0.5"
                 : ""
-            }`}
+              }`}
           >
             <div className={`p-4 rounded-lg text-white ${card.color}`}>
               <card.icon size={24} />
@@ -209,11 +208,11 @@ const Dashboard = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
         <h2 className="text-base md:text-lg font-bold text-gray-900 mb-6">Growth Analytics (Last 30 Days)</h2>
         <div className="w-full h-[300px] md:h-[400px]">
-          <ReactApexChart 
-            options={chartOptions} 
-            series={chartSeries} 
-            type="area" 
-            height="100%" 
+          <ReactApexChart
+            options={chartOptions}
+            series={chartSeries}
+            type="area"
+            height="100%"
           />
         </div>
       </div>

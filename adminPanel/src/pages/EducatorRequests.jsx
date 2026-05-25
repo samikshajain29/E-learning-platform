@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { 
-  User, Mail, Phone, BookOpen, GraduationCap, 
+import {
+  User, Mail, Phone, BookOpen, GraduationCap,
   Link as LinkIcon, Briefcase, FileText, Check, X,
-  BadgeCheck 
+  BadgeCheck
 } from "lucide-react";
 
 const API_URL = "http://localhost:8000/api";
@@ -12,7 +12,7 @@ const EducatorRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState(null);
@@ -27,12 +27,12 @@ const EducatorRequests = () => {
 
   useEffect(() => {
     fetchRequests();
-    
+
     // Auto Data Fetching (Polling) to instantly reflect new applications
     const interval = setInterval(() => {
       fetchRequests(true);
     }, 5000); // 5 seconds interval
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -69,9 +69,9 @@ const EducatorRequests = () => {
       setActionLoading(true);
       setActionError(null);
       setActionMessage(null);
-      
+
       await axios.patch(`${API_URL}/admin/educator-request/${id}`, { status }, getAuthHeaders());
-      
+
       setActionMessage(`Request successfully ${status}!`);
       // Remove from list immediately
       setRequests(prev => prev.filter(req => req._id !== id));
@@ -79,7 +79,7 @@ const EducatorRequests = () => {
         setSelectedRequest(null);
         setActionMessage(null);
       }, 1500);
-      
+
     } catch (err) {
       console.error(err);
       // 401 is handled globally by the axios interceptor (auto-redirect to login)
@@ -93,7 +93,7 @@ const EducatorRequests = () => {
 
   const handleDownload = async (url, type, name) => {
     if (!url) return;
-    
+
     // Format URL properly
     let finalUrl = url;
     if (!finalUrl.startsWith("http")) {
@@ -115,14 +115,14 @@ const EducatorRequests = () => {
       // Important Fallback Strategy: Fetch file directly as a Blob to enforce download without relying on browser navigation behavior
       const res = await axios.get(finalUrl, { responseType: 'blob' });
       const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
-      
+
       const link = document.createElement("a");
       link.href = blobUrl;
       link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       setTimeout(() => window.URL.revokeObjectURL(blobUrl), 30000); // Cleanup memory
     } catch (err) {
       console.warn("Blob download failed, falling back to direct anchor...", err);
@@ -176,18 +176,18 @@ const EducatorRequests = () => {
             ) : (
               <ul className="divide-y divide-gray-100 max-h-[70vh] lg:max-h-[80vh] overflow-y-auto">
                 {requests.map(req => (
-                  <li 
+                  <li
                     key={req._id}
                     onClick={() => {
-                        setSelectedRequest(req);
-                        setActionMessage(null);
-                        setActionError(null);
+                      setSelectedRequest(req);
+                      setActionMessage(null);
+                      setActionError(null);
                     }}
                     className={`p-4 cursor-pointer hover:bg-purple-50 transition-colors ${selectedRequest?._id === req._id ? 'bg-purple-50 border-l-4 border-purple-600' : 'border-l-4 border-transparent'}`}
                   >
                     <div className="flex items-center gap-4">
-                      <img 
-                        src={req.profileImageUrl} 
+                      <img
+                        src={req.profileImageUrl}
                         alt={req.name}
                         className="w-12 h-12 rounded-full object-cover border border-gray-200"
                         onError={(e) => { e.target.src = 'https://via.placeholder.com/150'; }}
@@ -207,13 +207,13 @@ const EducatorRequests = () => {
         {/* Detail Panel */}
         {selectedRequest && (
           <div className="w-full lg:w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6 relative overflow-y-auto max-h-[85vh]">
-            <button 
+            <button
               onClick={() => setSelectedRequest(null)}
               className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition"
             >
               <X size={20} />
             </button>
-            
+
             {(actionMessage || actionError) && (
               <div className={`p-4 rounded-lg mb-6 ${actionError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
                 {actionError || actionMessage}
@@ -221,8 +221,8 @@ const EducatorRequests = () => {
             )}
 
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 mt-2 text-center sm:text-left">
-              <img 
-                src={selectedRequest.profileImageUrl} 
+              <img
+                src={selectedRequest.profileImageUrl}
                 alt={selectedRequest.name}
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white shadow-md"
               />
@@ -249,11 +249,11 @@ const EducatorRequests = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold text-gray-900 uppercase text-xs tracking-wider border-b pb-2">Expertise</h3>
                 <div className="flex gap-3 text-gray-600">
-                  <GraduationCap size={18} className="text-gray-400 flex-shrink-0 mt-0.5" /> 
+                  <GraduationCap size={18} className="text-gray-400 flex-shrink-0 mt-0.5" />
                   <span className="break-all">{selectedRequest.qualification}</span>
                 </div>
                 <div className="flex gap-3 text-gray-600">
-                  <BookOpen size={18} className="text-gray-400 flex-shrink-0 mt-0.5" /> 
+                  <BookOpen size={18} className="text-gray-400 flex-shrink-0 mt-0.5" />
                   <span className="break-all">{selectedRequest.subjects}</span>
                 </div>
               </div>
@@ -276,13 +276,13 @@ const EducatorRequests = () => {
             </div>
 
             <div className="mb-8 flex flex-col sm:flex-row gap-4">
-              <button 
+              <button
                 onClick={() => handleDownload(selectedRequest.resumeUrl, 'resume', selectedRequest.name)}
                 className="flex-1 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 py-3 px-4 rounded-lg font-medium hover:bg-blue-100 transition border border-blue-200"
               >
                 <FileText size={18} /> Resume
               </button>
-              <button 
+              <button
                 onClick={() => handleDownload(selectedRequest.idProofUrl, 'id_proof', selectedRequest.name)}
                 className="flex-1 flex items-center justify-center gap-2 bg-gray-50 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-100 transition border border-gray-200"
               >
@@ -291,14 +291,14 @@ const EducatorRequests = () => {
             </div>
 
             <div className="border-t pt-6 flex flex-col sm:flex-row justify-end gap-3 sticky bottom-0 bg-white py-4 shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.05)]">
-              <button 
+              <button
                 disabled={actionLoading}
                 onClick={() => handleAction(selectedRequest._id, "rejected")}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 border border-red-200 text-red-600 font-medium rounded-lg hover:bg-red-50 transition disabled:opacity-50"
               >
                 <X size={18} /> {actionLoading ? 'Processing...' : 'Reject'}
               </button>
-              <button 
+              <button
                 disabled={actionLoading}
                 onClick={() => handleAction(selectedRequest._id, "approved")}
                 className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm disabled:opacity-50"
