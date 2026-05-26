@@ -207,8 +207,7 @@ const EducatorRequests = () => {
         {/* Detail Panel */}
         {selectedRequest && (
           <div className="w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-y-auto max-h-[85vh]">
-            <button 
->>>>>>> parent of fe88f65 (adminPanel Responsive)
+            <button
               onClick={() => setSelectedRequest(null)}
               className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition"
             >
@@ -223,8 +222,7 @@ const EducatorRequests = () => {
 
             <div className="flex items-center gap-6 mb-8 mt-2">
               <img 
-                src={selectedRequest.profileImageUrl} 
->>>>>>> parent of fe88f65 (adminPanel Responsive)
+                src={selectedRequest.profileImageUrl}
                 alt={selectedRequest.name}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
               />
@@ -278,8 +276,7 @@ const EducatorRequests = () => {
             </div>
 
             <div className="mb-8 grid grid-cols-2 gap-4">
-              <button 
->>>>>>> parent of fe88f65 (adminPanel Responsive)
+              <button
                 onClick={() => handleDownload(selectedRequest.resumeUrl, 'resume', selectedRequest.name)}
                 className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 py-3 px-4 rounded-lg font-medium hover:bg-blue-100 transition border border-blue-200"
               >
@@ -294,8 +291,7 @@ const EducatorRequests = () => {
             </div>
 
             <div className="border-t pt-6 flex justify-end gap-3 sticky bottom-0 bg-white py-4 shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.05)]">
-              <button 
->>>>>>> parent of fe88f65 (adminPanel Responsive)
+              <button
                 disabled={actionLoading}
                 onClick={() => handleAction(selectedRequest._id, "rejected")}
                 className="flex items-center gap-2 px-6 py-2.5 border border-red-200 text-red-600 font-medium rounded-lg hover:bg-red-50 transition disabled:opacity-50"
