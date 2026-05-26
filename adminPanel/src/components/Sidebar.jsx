@@ -1,13 +1,13 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LayoutDashboard, LogOut, X } from "lucide-react";
+import { LayoutDashboard, LogOut } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import logo from "../assets/logo.jpg";
 
 const API_URL = (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "http://localhost:8000/api");
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+const Sidebar = () => {
   const { logout, isAuthenticated } = useAuth();
   const location = useLocation();
   const [unseenCount, setUnseenCount] = useState(0);
@@ -34,21 +34,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   // When navigating TO the educator-requests page, reset count immediately
   // (the EducatorRequests page will call mark-seen)
-  // When navigating, close sidebar on mobile
   useEffect(() => {
-    if (setIsOpen) setIsOpen(false);
     if (location.pathname === "/admin/educator-requests") {
       setUnseenCount(0);
     }
-  }, [location.pathname, setIsOpen]);
+  }, [location.pathname]);
 
   return (
-    <div className={`h-screen w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-50 transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+    <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-50">
       <div className="h-16 flex items-center px-6 gap-[10px] border-b border-gray-200">
-        <img src={logo} alt="logo" className="w-[40px] h-[40px] rounded-full" />
+        <img src={logo} alt="logo" className="w-[50px] h-[50px] rounded-full" />
         <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
           Admin Panel
         </h1>
+<<<<<<< HEAD
         {/* Close button for mobile inside sidebar */}
         <button
           onClick={() => setIsOpen(false)}
@@ -56,6 +55,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         >
           <X size={20} />
         </button>
+=======
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
       </div>
 
       <div className="flex-1 py-6 flex flex-col gap-2 px-4">

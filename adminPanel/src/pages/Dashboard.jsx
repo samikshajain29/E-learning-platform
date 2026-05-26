@@ -173,10 +173,10 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-[1600px] mx-auto">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="text-sm md:text-base text-gray-500 mt-1">Track your platform's performance and growth</p>
+    <div className="p-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+        <p className="text-gray-500 mt-1">Track your platform's performance and growth</p>
       </div>
 
       {/* Stats Grid */}
@@ -205,6 +205,7 @@ const Dashboard = () => {
       </div>
 
       {/* Analytics Chart */}
+<<<<<<< HEAD
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
         <h2 className="text-base md:text-lg font-bold text-gray-900 mb-6">Growth Analytics (Last 30 Days)</h2>
         <div className="w-full h-[300px] md:h-[400px]">
@@ -213,6 +214,16 @@ const Dashboard = () => {
             series={chartSeries}
             type="area"
             height="100%"
+=======
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-lg font-bold text-gray-900 mb-6">Growth Analytics (Last 30 Days)</h2>
+        <div className="w-full h-[400px]">
+          <ReactApexChart 
+            options={chartOptions} 
+            series={chartSeries} 
+            type="area" 
+            height={400} 
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
           />
         </div>
       </div>
