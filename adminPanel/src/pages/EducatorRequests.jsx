@@ -147,7 +147,7 @@ const EducatorRequests = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
       <div className="mb-8 flex justify-between items-center">
         <div>
@@ -163,9 +163,9 @@ const EducatorRequests = () => {
       )}
 
       {/* Main Layout */}
-      <div className="flex gap-6 relative">
+      <div className="flex flex-col lg:flex-row gap-6 relative">
         {/* List Section */}
-        <div className={`transition-all duration-300 ${selectedRequest ? 'w-1/3' : 'w-full'}`}>
+        <div className={`transition-all duration-300 ${selectedRequest ? 'hidden lg:block lg:w-1/3' : 'w-full'}`}>
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             {requests.length === 0 ? (
               <div className="p-12 text-center text-gray-500">
@@ -206,7 +206,7 @@ const EducatorRequests = () => {
 
         {/* Detail Panel */}
         {selectedRequest && (
-          <div className="w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-y-auto max-h-[85vh]">
+          <div className="w-full lg:w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6 relative overflow-y-auto max-h-[85vh]">
             <button
               onClick={() => setSelectedRequest(null)}
               className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition"
@@ -275,7 +275,7 @@ const EducatorRequests = () => {
               <p className="text-gray-600 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-100 italic">"{selectedRequest.bio}"</p>
             </div>
 
-            <div className="mb-8 grid grid-cols-2 gap-4">
+            <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => handleDownload(selectedRequest.resumeUrl, 'resume', selectedRequest.name)}
                 className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 py-3 px-4 rounded-lg font-medium hover:bg-blue-100 transition border border-blue-200"
@@ -290,18 +290,18 @@ const EducatorRequests = () => {
               </button>
             </div>
 
-            <div className="border-t pt-6 flex justify-end gap-3 sticky bottom-0 bg-white py-4 shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.05)]">
+            <div className="border-t pt-6 flex flex-col sm:flex-row sm:justify-end gap-3 sticky bottom-0 bg-white py-4 shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.05)]">
               <button
                 disabled={actionLoading}
                 onClick={() => handleAction(selectedRequest._id, "rejected")}
-                className="flex items-center gap-2 px-6 py-2.5 border border-red-200 text-red-600 font-medium rounded-lg hover:bg-red-50 transition disabled:opacity-50"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 border border-red-200 text-red-600 font-medium rounded-lg hover:bg-red-50 transition disabled:opacity-50"
               >
                 <X size={18} /> {actionLoading ? 'Processing...' : 'Reject'}
               </button>
               <button
                 disabled={actionLoading}
                 onClick={() => handleAction(selectedRequest._id, "approved")}
-                className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm disabled:opacity-50"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm disabled:opacity-50"
               >
                 <Check size={18} /> {actionLoading ? 'Processing...' : 'Approve Application'}
               </button>

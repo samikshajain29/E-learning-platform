@@ -1,13 +1,13 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LayoutDashboard, LogOut } from "lucide-react";
+import { LayoutDashboard, LogOut, X } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "axios";
 import logo from "../assets/logo.jpg";
 
 const API_URL = "https://e-learning-platform-server-dgpe.onrender.com/api";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { logout, isAuthenticated } = useAuth();
   const location = useLocation();
   const [unseenCount, setUnseenCount] = useState(0);
@@ -43,66 +43,95 @@ const Sidebar = () => {
   }, [location.pathname]);
 
   return (
-    <div className="h-screen w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-50">
-      <div className="h-16 flex items-center px-6 gap-[10px] border-b border-gray-200">
-        <img src={logo} alt="logo" className="w-[50px] h-[50px] rounded-full" />
-        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-          Admin Panel
-        </h1>
-      </div>
+    <>
+      {/* Backdrop overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 z-40 md:hidden transition-opacity duration-300"
+          onClick={onClose}
+        />
+      )}
 
-      <div className="flex-1 py-6 flex flex-col gap-2 px-4">
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              isActive
-                ? "bg-purple-50 text-purple-700 font-medium"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            }`
+      <div
+        className={`h-screen w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-50 transform md:translate-x-0 transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="h-16 flex items-center px-6 gap-[10px] border-b border-gray-200 justify-between">
+          <div className="flex items-center gap-[10px]">
+            <img src={logo} alt="logo" className="w-[50px] h-[50px] rounded-full" />
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Admin Panel
+            </h1>
+          </div>
+          {/* Close button for mobile */}
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-500 hover:text-gray-900 rounded-md md:hidden focus:outline-none focus:ring-2 focus:ring-purple-500"
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="flex-1 py-6 flex flex-col gap-2 px-4">
+          <NavLink
+            to="/"
+            onClick={onClose}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                isActive
+                  ? "bg-purple-50 text-purple-700 font-medium"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`
+            }
+          >
+            <LayoutDashboard size={20} />
+            Dashboard
+          </NavLink>
+
+          <NavLink
+            to="/admin/educator-requests"
+            onClick={onClose}
+            className="flex justify-center items-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-black hover:text-white rounded-lg transition-colors font-medium relative"
+          >
+            Educator Requests
+            {unseenCount > 0 && (
+              <span
+                className="absolute -top-2 -right-2 min-w-[22px] h-[22px] flex items-center justify-center px-1.5 text-xs font-bold text-white rounded-full shadow-md"
+                style={{
+                  background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                  animation: "badgePulse 2s ease-in-out infinite",
+                }}
+              >
+                {unseenCount > 99 ? "99+" : unseenCount}
+              </span>
+            )}
+          </NavLink>
+        </div>
+
+        <div className="p-4 border-t border-gray-200">
+          <button
+            onClick={() => {
+              onClose();
+              logout();
+            }}
+            className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors font-medium"
+          >
+            <LogOut size={18} />
+            Logout
+          </button>
+        </div>
+
+        {/* Badge pulse animation */}
+        <style>{`
+          @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
           }
-        >
-          <LayoutDashboard size={20} />
-          Dashboard
-        </NavLink>
-
-        <NavLink
-          to="/admin/educator-requests"
-          className="flex justify-center items-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-black hover:text-white rounded-lg transition-colors font-medium relative"
-        >
-          Educator Requests
-          {unseenCount > 0 && (
-            <span
-              className="absolute -top-2 -right-2 min-w-[22px] h-[22px] flex items-center justify-center px-1.5 text-xs font-bold text-white rounded-full shadow-md"
-              style={{
-                background: "linear-gradient(135deg, #ef4444, #dc2626)",
-                animation: "badgePulse 2s ease-in-out infinite",
-              }}
-            >
-              {unseenCount > 99 ? "99+" : unseenCount}
-            </span>
-          )}
-        </NavLink>
+        `}</style>
       </div>
-
-      <div className="p-4 border-t border-gray-200">
-        <button
-          onClick={logout}
-          className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-red-600 rounded-lg transition-colors font-medium"
-        >
-          <LogOut size={18} />
-          Logout
-        </button>
-      </div>
-
-      {/* Badge pulse animation */}
-      <style>{`
-        @keyframes badgePulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-      `}</style>
-    </div>
+    </>
   );
 };
 
