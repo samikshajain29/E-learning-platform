@@ -12,7 +12,11 @@ import {
   Activity
 } from "lucide-react";
 
+<<<<<<< HEAD
 const API_URL = (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "http://localhost:8000/api");
+=======
+const API_URL = "http://localhost:8000/api";
+>>>>>>> parent of c40938b (Update API_URL to production server)
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
