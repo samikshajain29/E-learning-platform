@@ -12,11 +12,7 @@ import {
   Activity
 } from "lucide-react";
 
-<<<<<<< HEAD
 const API_URL = "https://e-learning-platform-server-dgpe.onrender.com/api";
-=======
-const API_URL = "http://localhost:8000/api";
->>>>>>> parent of c40938b (Update API_URL to production server)
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
