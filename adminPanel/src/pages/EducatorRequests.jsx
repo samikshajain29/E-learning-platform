@@ -207,9 +207,12 @@ const EducatorRequests = () => {
         {/* Detail Panel */}
         {selectedRequest && (
 <<<<<<< HEAD
+<<<<<<< HEAD
           <div className="w-full lg:w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6 relative overflow-y-auto max-h-[85vh]">
             <button
 =======
+=======
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
           <div className="w-2/3 bg-white rounded-xl shadow-sm border border-gray-100 p-6 relative overflow-y-auto max-h-[85vh]">
             <button 
 >>>>>>> parent of fe88f65 (adminPanel Responsive)
@@ -226,10 +229,13 @@ const EducatorRequests = () => {
             )}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-8 mt-2 text-center sm:text-left">
               <img
                 src={selectedRequest.profileImageUrl}
 =======
+=======
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
             <div className="flex items-center gap-6 mb-8 mt-2">
               <img 
                 src={selectedRequest.profileImageUrl} 
@@ -287,9 +293,12 @@ const EducatorRequests = () => {
             </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             <div className="mb-8 flex flex-col sm:flex-row gap-4">
               <button
 =======
+=======
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
             <div className="mb-8 grid grid-cols-2 gap-4">
               <button 
 >>>>>>> parent of fe88f65 (adminPanel Responsive)
@@ -307,9 +316,12 @@ const EducatorRequests = () => {
             </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             <div className="border-t pt-6 flex flex-col sm:flex-row justify-end gap-3 sticky bottom-0 bg-white py-4 shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.05)]">
               <button
 =======
+=======
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
             <div className="border-t pt-6 flex justify-end gap-3 sticky bottom-0 bg-white py-4 shadow-[0_-10px_10px_-10px_rgba(0,0,0,0.05)]">
               <button 
 >>>>>>> parent of fe88f65 (adminPanel Responsive)

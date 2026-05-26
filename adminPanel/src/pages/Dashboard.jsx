@@ -210,6 +210,7 @@ const Dashboard = () => {
 
       {/* Analytics Chart */}
 <<<<<<< HEAD
+<<<<<<< HEAD
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-6">
         <h2 className="text-base md:text-lg font-bold text-gray-900 mb-6">Growth Analytics (Last 30 Days)</h2>
         <div className="w-full h-[300px] md:h-[400px]">
@@ -219,6 +220,8 @@ const Dashboard = () => {
             type="area"
             height="100%"
 =======
+=======
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-lg font-bold text-gray-900 mb-6">Growth Analytics (Last 30 Days)</h2>
         <div className="w-full h-[400px]">
@@ -227,6 +230,9 @@ const Dashboard = () => {
             series={chartSeries} 
             type="area" 
             height={400} 
+<<<<<<< HEAD
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
+=======
 >>>>>>> parent of fe88f65 (adminPanel Responsive)
           />
         </div>

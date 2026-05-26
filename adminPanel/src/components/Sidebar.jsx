@@ -48,6 +48,7 @@ const Sidebar = () => {
           Admin Panel
         </h1>
 <<<<<<< HEAD
+<<<<<<< HEAD
         {/* Close button for mobile inside sidebar */}
         <button
           onClick={() => setIsOpen(false)}
@@ -55,6 +56,8 @@ const Sidebar = () => {
         >
           <X size={20} />
         </button>
+=======
+>>>>>>> parent of fe88f65 (adminPanel Responsive)
 =======
 >>>>>>> parent of fe88f65 (adminPanel Responsive)
       </div>
