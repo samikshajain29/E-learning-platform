@@ -242,8 +242,13 @@ const EducatorRequests = () => {
 >>>>>>> parent of fe88f65 (adminPanel Responsive)
                 alt={selectedRequest.name}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
               />
               <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedRequest.name}</h2>
+                <div className="flex items-center gap-2 mt-2 text-gray-600">
+                  <span className="flex items-center gap-1 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full"><Briefcase size={14} /> {selectedRequest.currentRole || "N/A"}</span>
+                  <span className="flex items-center gap-1 text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{selectedRequest.experience} Yrs Experience</span>
                 <h2 className="text-2xl font-bold text-gray-900">{selectedRequest.name}</h2>
                 <div className="flex items-center gap-2 mt-2 text-gray-600">
                   <span className="flex items-center gap-1 text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full"><Briefcase size={14} /> {selectedRequest.currentRole || "N/A"}</span>
@@ -304,13 +309,17 @@ const EducatorRequests = () => {
 >>>>>>> parent of fe88f65 (adminPanel Responsive)
                 onClick={() => handleDownload(selectedRequest.resumeUrl, 'resume', selectedRequest.name)}
                 className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 py-3 px-4 rounded-lg font-medium hover:bg-blue-100 transition border border-blue-200"
+                className="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 py-3 px-4 rounded-lg font-medium hover:bg-blue-100 transition border border-blue-200"
               >
+                <FileText size={18} /> Download Resume
                 <FileText size={18} /> Download Resume
               </button>
               <button
                 onClick={() => handleDownload(selectedRequest.idProofUrl, 'id_proof', selectedRequest.name)}
                 className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-100 transition border border-gray-200"
+                className="flex items-center justify-center gap-2 bg-gray-50 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-100 transition border border-gray-200"
               >
+                <LinkIcon size={18} /> Download ID Proof
                 <LinkIcon size={18} /> Download ID Proof
               </button>
             </div>
@@ -328,6 +337,7 @@ const EducatorRequests = () => {
                 disabled={actionLoading}
                 onClick={() => handleAction(selectedRequest._id, "rejected")}
                 className="flex items-center gap-2 px-6 py-2.5 border border-red-200 text-red-600 font-medium rounded-lg hover:bg-red-50 transition disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 border border-red-200 text-red-600 font-medium rounded-lg hover:bg-red-50 transition disabled:opacity-50"
               >
                 <X size={18} /> {actionLoading ? 'Processing...' : 'Reject'}
               </button>
@@ -335,7 +345,9 @@ const EducatorRequests = () => {
                 disabled={actionLoading}
                 onClick={() => handleAction(selectedRequest._id, "approved")}
                 className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition shadow-sm disabled:opacity-50"
               >
+                <Check size={18} /> {actionLoading ? 'Processing...' : 'Approve Application'}
                 <Check size={18} /> {actionLoading ? 'Processing...' : 'Approve Application'}
               </button>
             </div>
