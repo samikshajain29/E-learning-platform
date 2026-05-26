@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 <<<<<<< HEAD
-const API_URL = (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "http://localhost:8000/api");
+const API_URL = "https://e-learning-platform-server-dgpe.onrender.com/api";
 =======
 const API_URL = "http://localhost:8000/api";
 >>>>>>> parent of c40938b (Update API_URL to production server)
