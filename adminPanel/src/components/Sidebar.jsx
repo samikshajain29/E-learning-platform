@@ -16,7 +16,9 @@ const Sidebar = () => {
   const fetchUnseenCount = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
-      const res = await axios.get(`${API_URL}/admin/educator-requests/unseen-count`);
+      const res = await axios.get(
+        `${API_URL}/admin/educator-requests/unseen-count`,
+      );
       setUnseenCount(res.data.count);
     } catch (err) {
       // Silently fail — 401 handled globally by interceptor
@@ -47,31 +49,16 @@ const Sidebar = () => {
         <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
           Admin Panel
         </h1>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        {/* Close button for mobile inside sidebar */}
-        <button
-          onClick={() => setIsOpen(false)}
-          className="md:hidden ml-auto p-2 text-gray-400 hover:text-gray-600"
-        >
-          <X size={20} />
-        </button>
-=======
->>>>>>> parent of fe88f65 (adminPanel Responsive)
-=======
->>>>>>> parent of fe88f65 (adminPanel Responsive)
-=======
->>>>>>> parent of fe88f65 (adminPanel Responsive)
       </div>
 
       <div className="flex-1 py-6 flex flex-col gap-2 px-4">
         <NavLink
           to="/"
           className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-              ? "bg-purple-50 text-purple-700 font-medium"
-              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              isActive
+                ? "bg-purple-50 text-purple-700 font-medium"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }`
           }
         >
