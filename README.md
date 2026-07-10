@@ -49,4 +49,10 @@ E-learning-platform/
 │── package.json     
 │── README.md
 
+---
+
+# Admin Panel
+
+https://e-learning-platform-adminpanel.onrender.com/
+
 
