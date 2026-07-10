@@ -48,7 +48,7 @@ E-learning-platform/
 │── backend/         # Express server & APIs
 │── package.json     
 │── README.md
-
+```
 ---
 
 # Admin Panel
